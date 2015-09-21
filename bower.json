@@ -1,0 +1,16 @@
+{
+  "name": "schleuder",
+  "version": "0.0.0",
+  "homepage": "https://github.com/Samisdat/schleuder",
+  "authors": [
+    "samisdat <bastian.sackermann@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
