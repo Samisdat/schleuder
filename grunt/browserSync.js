@@ -4,7 +4,7 @@ var browserSync = {
     dev: {
         files: {
             src: [
-                'assets/css/<%= pkg.name %>.css'
+                'public/css/<%= pkg.name %>.css'
             ]
         },
         injectChanges: true,

@@ -9,9 +9,9 @@ var jshint = {
 		browser: true,
 		jquery: true,
 	},
-    Conway:{
+    frontend:{
         src:[
-            'assets/js/**/*.js'
+            'public/js/**/*.js'
         ]
     },
 	gruntfiles:{
