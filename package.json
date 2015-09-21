@@ -1,0 +1,19 @@
+{
+  "name": "schleuder",
+  "version": "0.1.0",
+  "description": "NodeJS image scaling",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Samisdat/schleuder.git"
+  },
+  "keywords": [
+    "image",
+    "scaling"
+  ],
+  "author": "Bastian Pertz",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Samisdat/schleuder/issues"
+  },
+  "homepage": "https://github.com/Samisdat/schleuder"
+}
