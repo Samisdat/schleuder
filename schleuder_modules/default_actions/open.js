@@ -8,22 +8,6 @@ require('buffer');
 
 var fileType = require('file-type');
 
-var openLocal = function(filename){
-	var deferred = q.defer();
-
-	fs.readFile(filename, function(error, buffer){
-		if(error){
-			deferred.reject();
-		}
-
-  		lwip.open(buffer, 'jpg', function(err, image){
-  			deferred.resolve(image);	
-		});
-	});
-
-	return deferred.promise;
-};
-
 var getRequestOptions = function(imageUrl){
 	var options = {
 	  hostname: undefined,
