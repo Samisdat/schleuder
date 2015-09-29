@@ -1,3 +1,5 @@
+var q = require('q');
+
 var remoteImage = require('../schleuder_modules/image');
 
 var open = require('../schleuder_modules/default_actions/open');
@@ -10,6 +12,10 @@ var send = require('../schleuder_modules/default_actions/send');
 
 var action = require('../schleuder_modules/action.js');
 
+var crypto = require('crypto');
+var fs = require('fs');
+
+var fileType = require('file-type');
 
 var getImageUrl = function(request){
 
@@ -41,7 +47,64 @@ var getActionParameters = function(request){
 
 };
 
+var fromCache = function(request){
+
+	var deferred = q.defer();	
+
+	var hash = crypto.createHash('sha1');
+	hash.update(request.path);
+	
+	var requestHash = hash.digest('hex');
+	var cacheFile = __dirname + '/../cache/' + requestHash;
+
+	fs.readFile(cacheFile, function (err, data) {
+  		if (err){
+  			deferred.reject();
+  		} 
+  		deferred.resolve(data);
+	});
+
+	return deferred.promise;	
+
+};
+
+var toCache = function(request, buffer){
+	var deferred = q.defer();	
+
+	var hash = crypto.createHash('sha1');
+	hash.update(request.path);
+	
+	var requestHash = hash.digest('hex');
+	var cacheFile = __dirname + '/../cache/' + requestHash;
+
+	fs.writeFile(cacheFile, buffer,  'binary',  function (err, data) {
+  		if (err){
+  			deferred.reject();
+  		} 
+  		deferred.resolve(data);
+	});
+
+	return deferred.promise;	
+
+};
+
 var schleuder = function(request, response, next){
+
+	/*
+	var cached = fromCache(request).then(function(cacheBuffer){
+		var type = fileType(cacheBuffer);
+
+		console.log(type)
+  		response.contentType(
+        	type.mime
+    	);
+        response.setHeader("x-cached", "yes");
+		response.send(cacheBuffer);
+	
+		return;
+
+	});
+	*/
 
 	var imageUrl = getImageUrl(request);
 	var actionName = request.params.action;
@@ -59,6 +122,7 @@ var schleuder = function(request, response, next){
         	schleuderAction.getMimeType()
     	);
         response.send(buffer);
+        toCache(request, buffer);
       });   
   });
 
