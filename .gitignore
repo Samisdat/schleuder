@@ -3,3 +3,4 @@ public/components
 public/css
 ._*
 .DS_Store
+cache/*
