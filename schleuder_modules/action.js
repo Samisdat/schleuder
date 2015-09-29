@@ -1,12 +1,12 @@
 var schleuderAction = function(request, response, imageUrl, actionName, actionParams){
 
-	var mimeType = undefined;
+	var mimeType;
 
 	/* @var lwip*/
-	var orginalImage = undefined;
+	var orginalImage;
 
 	/* @var lwip*/
-	var actualImage = undefined;
+	var actualImage;
 
 	var getRequest = function(){
 		return imageUrl;

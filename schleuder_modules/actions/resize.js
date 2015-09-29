@@ -6,8 +6,8 @@ var resize = function(schleuderAction){
 	var deferred = q.defer();
 
 
-	var width = undefined;
-	var height = undefined;
+	var width;
+	var height;
 
 	var actionParams = schleuderAction.getActionParams();
 
@@ -15,7 +15,7 @@ var resize = function(schleuderAction){
 		width = parseInt(actionParams.width, 10);
 	}
 	if(undefined !== actionParams.height){
-		width = paraseInt(actionParams.height, 10);
+		height = parseInt(actionParams.height, 10);
 	}
 
 	if(undefined === width && undefined === height){

@@ -49,7 +49,6 @@ var schleuder = function(request, response, next){
 	var cached = cache.from(request.path).then(function(cacheBuffer){
 		var type = fileType(cacheBuffer);
 
-		console.log(type)
   		response.contentType(
         	type.mime
     	);
@@ -58,26 +57,22 @@ var schleuder = function(request, response, next){
 
 	}).fail(function(){
 	
-	var imageUrl = getImageUrl(request);
-	var actionName = request.params.action;
-	var actionParams = getActionParameters(request);
+		var imageUrl = getImageUrl(request);
+		var actionName = request.params.action;
+		var actionParams = getActionParameters(request);
 
-	var imageAction = action(request, response, imageUrl, actionName, actionParams);
+		var imageAction = action(request, response, imageUrl, actionName, actionParams);
 
-  	open(imageAction)
-	.then(resize)
-  	.then(send)
-  	.then(function(schleuderAction){
-      schleuderAction.getActualImage().toBuffer(schleuderAction.getFormat(), {quality:100}, function(err, buffer){
-        toCache(request.path, buffer);
-      });   
-  });
+	  	open(imageAction)
+		.then(resize)
+	  	.then(send)
+	  	.then(function(schleuderAction){
+			schleuderAction.getActualImage().toBuffer(schleuderAction.getFormat(), {quality:100}, function(err, buffer){
+				cache.to(request.path, buffer);
+	      	});   
+		});
 
 	});
-	
-
-	
-
 
 };
 

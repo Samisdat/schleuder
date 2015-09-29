@@ -1,3 +1,5 @@
+/*global __dirname */
+
 var crypto = require('crypto');
 var fs = require('fs');
 
@@ -35,8 +37,8 @@ var from = function(requestPath){
 	var cacheFile = getCacheFileName(requestPath);
 
 	fs.readFile(cacheFile, function (err, data) {
-		console.log(err)
-  		if (err){
+
+	  		if (err){
   			deferred.reject();
   		} 
   		deferred.resolve(data);

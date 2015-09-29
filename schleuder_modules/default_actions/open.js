@@ -1,3 +1,5 @@
+/*global Buffer */
+
 var fs = require('fs');
 var http = require('http');
 var url = require('url');
@@ -44,7 +46,7 @@ var open = function(schleuderAction){
 
 		res.on('data', function (chunk) {
 
-			data.push(chunk)
+			data.push(chunk);
 
 		});
 
@@ -53,7 +55,7 @@ var open = function(schleuderAction){
 			var imageBuffer = Buffer.concat(data);
 			
 			var type = fileType(imageBuffer);
-			schleuderAction.setMimeType(type.mime)
+			schleuderAction.setMimeType(type.mime);
 
 			if(undefined === schleuderAction.getFormat()){
 				deferred.reject();
@@ -68,8 +70,7 @@ var open = function(schleuderAction){
 	});
 
 	req.on('error', function(e) {
-	  console.log('problem with request: ' + e.message);
-	  deferred.reject();
+	  deferred.reject(e.message);
 	});
 
 	req.end();
