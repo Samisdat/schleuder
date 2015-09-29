@@ -1,4 +1,4 @@
-var schleuderAction = function(imageUrl, actionName, actionParams){
+var schleuderAction = function(request, response, imageUrl, actionName, actionParams){
 
 	var mimeType = undefined;
 
@@ -8,6 +8,12 @@ var schleuderAction = function(imageUrl, actionName, actionParams){
 	/* @var lwip*/
 	var actualImage = undefined;
 
+	var getRequest = function(){
+		return imageUrl;
+	};
+	var getResponse = function(){
+		return response;
+	};
 	var getImageUrl = function(){
 		return imageUrl;
 	};
@@ -84,6 +90,8 @@ var schleuderAction = function(imageUrl, actionName, actionParams){
 
 
 	return {
+		getRequest: getRequest,
+		getResponse: getResponse,
 		getImageUrl:getImageUrl,
 		getActionName: getActionName,
 		getActionParams: getActionParams,

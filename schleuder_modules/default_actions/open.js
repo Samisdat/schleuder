@@ -2,40 +2,39 @@ var fs = require('fs');
 var http = require('http');
 var url = require('url');
 var buffer = require('buffer');
+
 var lwip = require('lwip');
 var q = require('q');
-
-
 var fileType = require('file-type');
 
-var remoteImage = function(schleuderAction){
+
+var getRequestOptions = function(imageUrl){
+	var options = {
+	  hostname: undefined,
+	  port: undefined,
+	  path: undefined,
+	  method: 'GET'
+	};
+
+	var urlParsed = url.parse(imageUrl);
+
+	if(urlParsed.protocol === 'http:'){
+		options.port = 80;
+	}
+	else if(urlParsed.protocol === 'https:'){
+		options.port = 443;
+	}
+
+	options.hostname = urlParsed.hostname; 
+	options.path = urlParsed.path; 
+
+	return options;
+
+};
+
+var open = function(schleuderAction){
 
 	var deferred = q.defer();	
-
-
-	var getRequestOptions = function(imageUrl){
-		var options = {
-		  hostname: undefined,
-		  port: undefined,
-		  path: undefined,
-		  method: 'GET'
-		};
-
-		var urlParsed = url.parse(imageUrl);
-
-		if(urlParsed.protocol === 'http:'){
-			options.port = 80;
-		}
-		else if(urlParsed.protocol === 'https:'){
-			options.port = 443;
-		}
-
-		options.hostname = urlParsed.hostname; 
-		options.path = urlParsed.path; 
-
-		return options;
-
-	};
 
 	var options = getRequestOptions(schleuderAction.getImageUrl());
 
@@ -56,8 +55,6 @@ var remoteImage = function(schleuderAction){
 			var type = fileType(imageBuffer);
 			schleuderAction.setMimeType(type.mime)
 
-
-
 			if(undefined === schleuderAction.getFormat()){
 				deferred.reject();
 			}
@@ -72,6 +69,7 @@ var remoteImage = function(schleuderAction){
 
 	req.on('error', function(e) {
 	  console.log('problem with request: ' + e.message);
+	  deferred.reject();
 	});
 
 	req.end();
@@ -81,4 +79,4 @@ var remoteImage = function(schleuderAction){
 
 };
 
-module.exports = remoteImage;
+module.exports = open;
