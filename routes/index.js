@@ -13,10 +13,6 @@ router.get('/local-image', function(req, res, next) {
 
 });
 
-router.get('/foo', schleuder);
-
-router.get('/foobar', schleuder);
-
-
+router.get('^/:action//*//:image$', schleuder);
 
 module.exports = router;

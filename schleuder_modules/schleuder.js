@@ -8,42 +8,59 @@ var rotate = require('../schleuder_modules/actions/flip');
 
 var send = require('../schleuder_modules/default_actions/send');
 
+var action = require('../schleuder_modules/action.js');
+
+
+var getImageUrl = function(request){
+
+	var domain = 'http://schleuder.dev.pertz.eu';
+	request.params.image = 'local-image';
+
+	var imageUrl = domain + '/' + request.params.image;
+
+	return imageUrl;
+};
+
+var getActionParameters = function(request){
+
+	var actionParams = {};
+
+	if(0 === request.params.length){
+		return actionParams;
+	}
+
+	var rawActionParams = request.params[0];	
+
+	rawActionParams = rawActionParams.split('/');
+
+	for(var i = 0, x = rawActionParams.length; i < x; i += 2){
+		actionParams[rawActionParams[i]] = rawActionParams[(i + 1)]; 
+	}
+
+	return actionParams;
+
+};
+
 var schleuder = function(request, response, next){
 
-	var getImageUrl = function(){
-		if('/foo' === request.path){
-			return 'http://3.f.ix.de/scale/geometry/600/q75/imgs/18/1/4/5/3/3/9/9/16249197804_1806b101a2_k-89f4f4dd5091b029.jpeg';
-		}
-		if('/foobar' === request.path){
-			return 'http://vignette3.wikia.nocookie.net/callofduty/images/c/cf/Facebook_like_buton.png';
-		}
-	};
+	var imageUrl = getImageUrl(request);
+	var actionName = request.params.action;
+	var actionParams = getActionParameters(request);
 
-	var actions = {
-		resize:{
-			width:100,
-			height:100
-		},
-		flip:{
-			axis: 'x'
-		}
-	};
 
-    //open(getImageUrl())
-	//.then(rotate)
-  	//
-  	remoteImage(getImageUrl())
+	var imageAction = action(imageUrl, actionName, actionParams);
+
+  	remoteImage(imageAction)
 	.then(resize)
-  	.then(function(lwipImage){
+  	.then(function(schleuderAction){
 
-      lwipImage.getLwip().toBuffer(lwipImage.getFormat(), {quality:100}, function(err, buffer){
+      schleuderAction.getActualImage().toBuffer(schleuderAction.getFormat(), {quality:100}, function(err, buffer){
         response.contentType(
-        	lwipImage.getMimeType()
+        	schleuderAction.getMimeType()
     	);
         response.send(buffer);
       });   
   });
-
 
 
 

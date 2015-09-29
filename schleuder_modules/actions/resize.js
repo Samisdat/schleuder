@@ -1,21 +1,50 @@
 var lwip = require('lwip');
 var q = require('q');
 
-var resize = function(lwipImage){
+var resize = function(schleuderAction){
 
 	var deferred = q.defer();
 
-	lwipImage.getLwip()	.resize(100, 200, 'lanczos', function(error, img){
 
-		if(error){
-			deferred.reject();
+	var width = undefined;
+	var height = undefined;
+
+	var actionParams = schleuderAction.getActionParams();
+
+	if(undefined !== actionParams.width){
+		width = parseInt(actionParams.width, 10);
+	}
+	if(undefined !== actionParams.height){
+		width = paraseInt(actionParams.height, 10);
+	}
+
+	if(undefined === width && undefined === height){
+		deferred.reject();
+	}
+	else{
+
+		if(undefined === height){
+			height = Math.ceil(width / schleuderAction.getRatio());
 		}
-		else{
-			lwipImage.updateLwip(img);
-			deferred.resolve(lwipImage);
+		else if(undefined === width){
+			width = Math.ceil(height * schleuderAction.getRatio());
 		}
 
-	});
+		schleuderAction.getActualImage().resize(width, height, 'lanczos', function(error, image){
+
+			if(error){
+				deferred.reject();
+			}
+			else{
+
+				schleuderAction.setActualImage(image);
+				deferred.resolve(schleuderAction);
+			}
+
+		});
+
+	}
+
 
 	return deferred.promise;
 };
