@@ -1,4 +1,5 @@
 var q = require('q');
+var lwip = require('lwip');
 
 var pixel = function(red, green, blue, alpha){
 	return{
@@ -42,7 +43,9 @@ var seamCarver = function(lwipImage){
     };
 
     var copyImage = function(){
+    	lwip.create(image.width(), image.height(), {r:0, g:0, b:0, a:0}, function(err, image){
 
+    	});
     };
 
     var initHeatMap = function(){
@@ -59,7 +62,7 @@ var seamCarver = function(lwipImage){
 
 	    heatMap = [];
 	    var max = 0;
-	    for (var x = 0; width = image.width(); x < width;  x += 1) {
+	    for (var x = 0, width = image.width(); x < width;  x += 1) {
 	        heatMap[x] = [];
 	        for (var y = 0; y < image.height(); y++) {
 	            var xenergy = b(x - 1, y - 1) + 2 * b(x - 1, y) + b(x - 1, y + 1) - b(x + 1, y - 1) - 2 * b(x + 1, y) - b(x + 1, y + 1)
@@ -121,7 +124,7 @@ var seamCarver = function(lwipImage){
 	            
 	            // Choose the least energy
 	            yseam[x][y] = hx0 < hx1 ? (hx0 < hx2 ? x0 : x2) : (hx1 < hx2 ? x1 : x2);
-	            heatMap[yseam[x][y]][y] = NaN;
+	            //heatMap[yseam[x][y]][y] = NaN;
 	        }
 	    }
 	    
@@ -135,6 +138,72 @@ var seamCarver = function(lwipImage){
 
     var getHeatMap = function(){
 
+	    if(undefined === heatMap){
+	    	initHeatMap();
+	    }
+
+		lwip.create(image.width(), image.height(), {r:0, g:0, b:0}, function(err, blankImage){
+
+			var x = 0;
+			var y = 0;
+
+			var nextPixel = function(){
+				x += 1;
+
+				if(blankImage.width() <= x){
+					x = 0;
+					y += 1;
+				}
+
+				if(blankImage.height() <= y){
+					return false;
+				}
+
+				return true;
+			};
+
+			var colorPixel = function(){
+
+				var color = parseInt(heatMap[x][y] / maxHeat * 255, 10);
+				
+				blankImage.setPixel(x, y, {r:color, g:color, b:color}, function(){
+					var hasNext = nextPixel();
+					if(true === hasNext){
+						colorPixel();
+					}
+					else{
+						blankImage.writeFile('/var/www/schleuder/raw-images/heatmap.jpg', 'jpg', {quality:100}, function(){});
+					}
+				});
+			};
+
+			colorPixel();
+
+		});
+
+		return;
+    
+    	//lwip.create(image.width(), image.height(), {r:0, g:0, b:0}, function(err, blankImage){
+		lwip.create(image.width(), image.height(), {r:0, g:0, b:0}, function(err, blankImage){
+		    for (var x = 0; x < blankImage.width(); x++) {
+		        for (var y = 0; y < blankImage.height(); y++) {
+		            var color = parseInt(heatMap[x][y] / maxHeat * 255, 10);
+
+
+		            blankImage.setPixel(
+		            	x, 
+		            	y, 
+		            	{
+		            		r: 1,
+		                	b: 1,
+		                	g: 1
+		            	}
+		            );
+		        }
+		    }
+
+    	});
+
     };
 
     var getSeams = function(){
@@ -143,8 +212,48 @@ var seamCarver = function(lwipImage){
 
     var resize = function(dim){
 
+	    if(undefined === seams){
+	    	initSeams();
+	    }
+	    console.log("Starting resize Reduce");
+	    
+	    newImage = [];
+	    var widthDiff = image.width() - dim.width;
+	    console.log("Removing Seams");
+	    for (var y = 0; y < image.height(); y++) {
+	        var x1 = 0; // x counter of the new image
+	        for (var x = 0; x < image.width(); x++) {
+	            putPixel(x, y, getPixel(x, y));
+	            var isSkippable = false;
+	            for (var i = 0; i < widthDiff; i++) {
+	                if (seams[i][y] == x) {
+	                    isSkippable = true;
+	                    console.log(isSkippable);
+	                    break;
+	                }
+	            }
+	            if (isSkippable == false) {
+	                putPixel(x1, y, getPixel(x, y));
+	                x1++;
+	            }
+	        }
+	    }
+	    console.log("Seams removed, placing empty pixels in reduced portion of image");
+	    return;
+	    for (var x = dim.width; x < image.width(); x++) {
+	        for (var y = 0; y < image.height(); y++) {
+	            putPixel(x, y, 0xABCDEF);
+	        }
+	    }
+	    console.log("Reduced image ready");
+
+
     };
 
+    return {
+    	getHeatMap: getHeatMap,
+    	resize:resize
+    };
 };
 
 var seamCarverAction = function(schleuderAction){
@@ -152,7 +261,7 @@ var seamCarverAction = function(schleuderAction){
 	var deferred = q.defer();
 
 	var carved = seamCarver(schleuderAction.getActualImage());
-
+	
 	schleuderAction.getActualImage().mirror('y', function(error, image){
 
 		if(error){
