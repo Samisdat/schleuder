@@ -144,65 +144,20 @@ var seamCarver = function(lwipImage){
 
 		lwip.create(image.width(), image.height(), {r:0, g:0, b:0}, function(err, blankImage){
 
-			var x = 0;
-			var y = 0;
+			var batch = blankImage.batch();
 
-			var nextPixel = function(){
-				x += 1;
-
-				if(blankImage.width() <= x){
-					x = 0;
-					y += 1;
-				}
-
-				if(blankImage.height() <= y){
-					return false;
-				}
-
-				return true;
-			};
-
-			var colorPixel = function(){
-
-				var color = parseInt(heatMap[x][y] / maxHeat * 255, 10);
+			for (var x = 0; x < blankImage.width(); x++) {
+		    	for (var y = 0; y < blankImage.height(); y++) {
+					var color = parseInt(heatMap[x][y] / maxHeat * 255, 10);
 				
-				blankImage.setPixel(x, y, {r:color, g:color, b:color}, function(){
-					var hasNext = nextPixel();
-					if(true === hasNext){
-						colorPixel();
-					}
-					else{
-						blankImage.writeFile('/var/www/schleuder/raw-images/heatmap.jpg', 'jpg', {quality:100}, function(){});
-					}
-				});
-			};
-
-			colorPixel();
-
-		});
-
-		return;
-    
-    	//lwip.create(image.width(), image.height(), {r:0, g:0, b:0}, function(err, blankImage){
-		lwip.create(image.width(), image.height(), {r:0, g:0, b:0}, function(err, blankImage){
-		    for (var x = 0; x < blankImage.width(); x++) {
-		        for (var y = 0; y < blankImage.height(); y++) {
-		            var color = parseInt(heatMap[x][y] / maxHeat * 255, 10);
-
-
-		            blankImage.setPixel(
-		            	x, 
-		            	y, 
-		            	{
-		            		r: 1,
-		                	b: 1,
-		                	g: 1
-		            	}
-		            );
+					batch.setPixel(x, y, {r:color, g:color, b:color});
+	
 		        }
 		    }
+	    	    
+			batch.writeFile('/var/www/schleuder/raw-images/heatmap.jpg', 'jpg', {quality:100}, function(){});
 
-    	});
+		});
 
     };
 
