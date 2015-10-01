@@ -180,9 +180,11 @@ var seamCarver = function(lwipImage){
 
 			var color = 255;
 			var step = 1;//parseInt(color / this.image.width);
+			
 			for (var x = 0; x < seams.length; x++) {
 				for (var y = 0; y < image.height(); y++) {
 				    batch.setPixel(x, y, getRotationgColor(color));
+
 				}
 				color = (color - step < 0) ? 255 : color - step;
 			}

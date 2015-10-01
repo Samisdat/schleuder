@@ -4,7 +4,8 @@ var open = require('../schleuder_modules/default_actions/open');
 
 var resize = require('../schleuder_modules/actions/resize');
 var scale = require('../schleuder_modules/actions/scale');
-var rotate = require('../schleuder_modules/actions/flip');
+var flip = require('../schleuder_modules/actions/flip');
+var seamCarver = require('../schleuder_modules/actions/seamcarver');
 
 var send = require('../schleuder_modules/default_actions/send');
 var cache = require('../schleuder_modules/default_actions/cache');
@@ -64,7 +65,7 @@ var schleuder = function(request, response, next){
 		var imageAction = action(request, response, imageUrl, actionName, actionParams);
 
 	  	open(imageAction)
-		.then(resize)
+		.then(seamCarver)
 	  	.then(send)
 	  	.then(function(schleuderAction){
 			schleuderAction.getActualImage().toBuffer(schleuderAction.getFormat(), {quality:100}, function(err, buffer){
