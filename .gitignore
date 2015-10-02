@@ -4,3 +4,4 @@ public/css
 ._*
 .DS_Store
 cache/*
+coverage
