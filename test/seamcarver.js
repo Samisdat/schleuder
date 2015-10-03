@@ -38,7 +38,7 @@ describe("SeamCarver", function() {
 
 	describe("Get Heat Map", function() {
 
-		this.timeout(6000);
+		this.timeout(50000);
 
     	it("generate a heatmap of a given image", function(done) {
 
@@ -75,6 +75,25 @@ describe("SeamCarver", function() {
 
 			done();
 		});
+
+		it("generate a heatmap image of a given image", function(done) {
+
+			var fileName = '/var/www/schleuder/public/seamcarver/heatmap.jpg';
+			if(fs.existsSync(fileName)){
+				fs.unlinkSync(fileName);
+			}
+
+			expect(fs.existsSync(fileName)).to.equal(false);
+
+			var seamCarving = seamCarver(lwipImage);
+			seamCarving.getHeatMap()
+			.then(function(){
+				expect(fs.existsSync(fileName)).to.equal(true);
+				done();
+			});
+			
+		});
+
 	});
 
 });

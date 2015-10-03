@@ -1,4 +1,5 @@
 var lwip = require('lwip');
+var q = require('q');
 
 var seamCarver = function(lwipImage){
 
@@ -56,10 +57,6 @@ var seamCarver = function(lwipImage){
                 var xenergy = b(x - 1, y - 1) + 2 * b(x - 1, y) + b(x - 1, y + 1) - b(x + 1, y - 1) - 2 * b(x + 1, y) - b(x + 1, y + 1)
                 var yenergy = b(x - 1, y - 1) + 2 * b(x, y - 1) + b(x + 1, y - 1) - b(x - 1, y + 1) - 2 * b(x, y + 1) - b(x + 1, y + 1)
                 heatMap[x][y] = Math.sqrt(xenergy * xenergy + yenergy * yenergy);
-                if(7 === 8 && 12 === x && 424 === y){
-                    console.log(b(x + 1, y + 1))
-                    console.log(getPixel(x + 1, y + 1));
-                }
                 max = (max > heatMap[x][y] ? max : heatMap[x][y]);
             }
         }
@@ -77,25 +74,32 @@ var seamCarver = function(lwipImage){
     };
 
     var getHeatMap = function(){
+        var deferred = q.defer();
+        var heatMapData = initHeatMap();
+        
+        var maxHeat = heatMapData.maxHeat;
+        var heatMap = heatMapData.heatMap;
 
-        var heatMap = initHeatMap();
 
         lwip.create(getWidth(), getHeight(), {r:0, g:0, b:0}, function(err, blankImage){
 
             var batch = blankImage.batch();
-
             for (var x = 0; x < blankImage.width(); x++) {
                 for (var y = 0; y < blankImage.height(); y++) {
                     var color = parseInt(heatMap[x][y] / maxHeat * 255, 10);
-                    
-                    batch.setPixel(x, y, {r:color, g:color, b:color});
-    
+                    color = {r:color, g:color, b:color};
+
+                    batch.setPixel(x, y, color);
                 }
             }
-                
-            batch.writeFile('/var/www/schleuder/public/heatmap.jpg', 'jpg', {quality:100}, function(){});
+            batch.writeFile('/var/www/schleuder/public/seamcarver/heatmap.jpg', 'jpg', {quality:100}, function(error){
+                deferred.resolve();
+            });
 
+  
         });
+
+        return deferred.promise;
 
 
     };
