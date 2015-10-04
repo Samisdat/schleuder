@@ -8,6 +8,9 @@ var seamCarver = function(lwipImage){
 
     var pixels = []
 
+    var heatMap;
+    var maxHeat;
+
     var getWidth = function(){
         return width;
     };
@@ -40,42 +43,207 @@ var seamCarver = function(lwipImage){
 
     };
 
-    var initHeatMap = function(){
-        var b = function(x, y){
-            if (x < 0 || y < 0 || x >= getWidth() || y >= getHeight()) {
-                return 0;
-            }
-            var pixel = getPixel(x, y);
-            return (pixel.r + pixel.g + pixel.b);
+    var b = function(x, y){
+        if (x < 0 || y < 0 || x >= getWidth() || y >= getHeight()) {
+            return 0;
         }
+        var pixel = getPixel(x, y);
+        return (pixel.r + pixel.g + pixel.b);
+    }
 
-        var heatMap = [];
+
+    /**
+     * Heatmap taken from 
+     * https://github.com/axemclion/seamcarving
+     */
+    var generateHeatMap = function(){
+
+        heatMap = [];
         var max = 0;
         for (var x = 0, width = getWidth(); x < width;  x += 1) {
-            heatMap[x] = [];
+            var heatMapRow = [];
             for (var y = 0; y < getHeight(); y++) {
                 var xenergy = b(x - 1, y - 1) + 2 * b(x - 1, y) + b(x - 1, y + 1) - b(x + 1, y - 1) - 2 * b(x + 1, y) - b(x + 1, y + 1)
                 var yenergy = b(x - 1, y - 1) + 2 * b(x, y - 1) + b(x + 1, y - 1) - b(x - 1, y + 1) - 2 * b(x, y + 1) - b(x + 1, y + 1)
-                heatMap[x][y] = Math.sqrt(xenergy * xenergy + yenergy * yenergy);
-                max = (max > heatMap[x][y] ? max : heatMap[x][y]);
+                heatMapRow.push(Math.sqrt(xenergy * xenergy + yenergy * yenergy));
             }
+            heatMap.push(heatMapRow);
         }
-        maxHeat = max;
 
-        return{
-            maxHeat: maxHeat,
-            heatMap: heatMap
+        // the heatmap implenentation from https://github.com/axemclion/seamcarving generates ver high values for all four edges
+        // for now: just replace all edge pixels with their neibours
+        heatMap[0] = heatMap[1];
+        heatMap[(heatMap.length-1)] = heatMap[(heatMap.length-2)];
+
+        for (var row = 0, rows = getHeight(); row < rows;  row += 1) {
+            heatMap[row][0] = heatMap[row][1];
+            heatMap[row][(heatMap.length-1)] = heatMap[row][(heatMap.length-2)];
         }
+    };
+
+    generateHeatMap();
+
+    var setMaxHeat = function(){
+        var maxHeatInRow = [];
+
+        for (var row = 0, rows = getHeight(); row < rows;  row += 1) {
+            maxHeatInRow.push(Math.max.apply(Math, heatMap[row]));
+        }
+
+        maxHeat = Math.max.apply(Math, maxHeatInRow);
 
     };
 
+    setMaxHeat();
+
+    var getSeam = function(start){
+        var seam = [start];
+
+        var seamDirection = function(x, y){
+
+            console.log(y)
+            var below = y + 1;
+
+            var neighbours = {
+                left: Number.MAX_VALUE,
+                below: Number.MAX_VALUE,
+                right: Number.MAX_VALUE
+            };
+
+            if(0 < x){
+                neighbours.left = heatMap[below][(x - 1)];
+            }
+
+            neighbours.below = heatMap[below][x];
+
+            if(getWidth() >= (x + 1)){
+                neighbours.right = heatMap[below][(x + 1)];
+            }
+
+            //@TODO when two or thre neigbours have the same value: Go to each direction in a dubplicate of the current seam
+            console.log(neighbours)
+            console.log(neighbours.left < neighbours.center, neighbours.left < neighbours.right)
+            // go left
+            if(neighbours.left < neighbours.below && neighbours.left < neighbours.right){
+                seam.push(x-1);
+            }
+            // go right
+            else if(neighbours.right < neighbours.below && neighbours.right < neighbours.left){
+                seam.push(x + 1);
+            }
+            else{
+                seam.push(x);
+            }
+
+            if(seam.length < getHeight()){
+                seamDirection(
+                    seam[seam.length-1],
+                    below
+                );
+            }
+            else{
+                console.log(seam)        
+            }
+        };
+        
+
+        seamDirection(start, 0);
+
+
+    };
+
+    var generateSeams = function(){
+
+        getSeam(10);
+        return;
+        for (var col = 0, cols = getWidth(); col < cols;  col += 1) {
+            var seam = [];
+
+        }
+
+
+    };
+
+    generateSeams();
+
+
+
     var initSeams = function(){
+
+        console.log("Starting to calculate seams");
+        var yseam = [];
+
+        var heatMapData = generateHeatMap();
+        
+        var heatMap = heatMapData.heatMap;  
+
+        
+        var ylen = height - 1;
+
+        // initialize the last row of the seams
+        for (var x = 0; x < width; x++) {
+            yseam[x] = [];
+            yseam[x][ylen] = x;
+        }
+        
+        // sort the last row of the seams
+        for (var i = 0; i < yseam.length; i++) {
+            for (var j = i + 1; j < yseam.length; j++) {
+                console.log(heatMap[yseam[i][ylen]][ylen] > heatMap[yseam[j][ylen]][ylen]);
+                if (heatMap[yseam[i][ylen]][ylen] > heatMap[yseam[j][ylen]][ylen]) {
+                    var tmp = yseam[j];
+                    yseam[j] = yseam[i]
+                    yseam[i] = tmp;
+                }
+            }
+        }
+
+
+        // get the other rows of the seams
+        for (var x = 0; x < yseam.length; x++) {
+            for (var y = ylen - 1; y >= 0; y--) {
+                var x1 = yseam[x][y + 1];
+                var x0 = x1 - 1;
+                // Move along till the adjacent pixel is not a part of another seam
+                while (x0 >= 0) {
+                    if (!isNaN(heatMap[x0][y])) 
+                        break;
+                    x0--;
+                }
+                
+                var x2 = x1 + 1;
+                while (x2 < width) {
+                    if (!isNaN(heatMap[x2][y])) 
+                        break;
+                    x2++;
+                }
+                
+                var hx0 = heatMap[x0] ? heatMap[x0][y] : Number.MAX_VALUE;
+                var hx1 = heatMap[x1][y] || Number.MAX_VALUE;
+                var hx2 = heatMap[x2] ? heatMap[x2][y] : Number.MAX_VALUE;
+                
+                // Choose the least energy
+                yseam[x][y] = hx0 < hx1 ? (hx0 < hx2 ? x0 : x2) : (hx1 < hx2 ? x1 : x2);
+                
+                if(100 === x && 100 === y){
+                    //console.log('x1', x1)                    
+                    //console.log(hx0, ' - ' ,  hx1)    
+                }
+                
+                heatMap[yseam[x][y]][y] = NaN;
+            }
+        }
+        
+        console.log("Seams calculated");
+
+
+        return yseam;
 
     };
 
     var getHeatMap = function(){
         var deferred = q.defer();
-        var heatMapData = initHeatMap();
+        var heatMapData = generateHeatMap();
         
         var maxHeat = heatMapData.maxHeat;
         var heatMap = heatMapData.heatMap;
@@ -115,8 +283,9 @@ var seamCarver = function(lwipImage){
     return {
         getWidth: getWidth,
         getHeight: getHeight,
-        initHeatMap:initHeatMap,
+        initHeatMap:generateHeatMap,
         getHeatMap: getHeatMap,
+        initSeams:initSeams,
         getSeams:getSeams,
         resize:resize
     };
