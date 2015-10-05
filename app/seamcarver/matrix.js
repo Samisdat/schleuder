@@ -43,7 +43,7 @@ var seamMatrixItem = function(){
 	};
 
 	var isMemberOfSeam = function(seam){
-		return (memberInSeams.findIndex(seam) !== -1);
+		return (memberInSeams.lastIndexOf(seam) !== -1);
 	};
 
 	var markAsMemberInSeams = function(seam){

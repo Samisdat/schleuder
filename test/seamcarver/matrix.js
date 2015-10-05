@@ -58,6 +58,29 @@ describe('SeamCarver Matrix Item', function() {
 
 	});		
 
+	it('shoud manage seam membership', function() {
+
+		var seamMatrixItem = seamMatrixModule.seamMatrixItem();
+		
+		expect(seamMatrixItem.getMemberInSeams()).to.deep.equal([]);
+		
+		expect(seamMatrixItem.isMemberOfSeam(1)).to.be.false;
+
+		seamMatrixItem.markAsMemberInSeams(1);
+		expect(seamMatrixItem.isMemberOfSeam(1)).to.be.true;
+		expect(seamMatrixItem.getMemberInSeams()).to.deep.equal([1]);
+
+		seamMatrixItem.markAsMemberInSeams(2);
+		expect(seamMatrixItem.isMemberOfSeam(2)).to.be.true;
+		expect(seamMatrixItem.getMemberInSeams()).to.deep.equal([1,2]);
+
+		seamMatrixItem.markAsMemberInSeams(1);
+		expect(seamMatrixItem.isMemberOfSeam(2)).to.be.true;
+		expect(seamMatrixItem.getMemberInSeams()).to.deep.equal([1,2]);
+
+	});		
+
+
 });
 
 
