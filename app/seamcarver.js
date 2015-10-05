@@ -96,12 +96,16 @@ var seamCarver = function(lwipImage){
 
     setMaxHeat();
 
-    var getSeam = function(start){
-        var seam = [start];
+    var getSeam = function(startCol){
+        var seam = {
+            value: 0,
+            startCol:startCol,
+            col:[startCol],
+            containDuplicate: false
+        };
 
         var seamDirection = function(x, y){
 
-            console.log(y)
             var below = y + 1;
 
             var neighbours = {
@@ -121,45 +125,91 @@ var seamCarver = function(lwipImage){
             }
 
             //@TODO when two or thre neigbours have the same value: Go to each direction in a dubplicate of the current seam
-            console.log(neighbours)
-            console.log(neighbours.left < neighbours.center, neighbours.left < neighbours.right)
+
             // go left
             if(neighbours.left < neighbours.below && neighbours.left < neighbours.right){
-                seam.push(x-1);
+                seam.value += neighbours.left;
+                seam.col.push(x-1);
             }
             // go right
             else if(neighbours.right < neighbours.below && neighbours.right < neighbours.left){
-                seam.push(x + 1);
+                seam.value += neighbours.right;
+                seam.col.push(x+1);
             }
             else{
-                seam.push(x);
+                seam.value += neighbours.below;
+                seam.col.push(x);
             }
-
-            if(seam.length < getHeight()){
+            
+            if(seam.col.length < getHeight()){
                 seamDirection(
-                    seam[seam.length-1],
+                    seam.col[(seam.col.length-1)],
                     below
                 );
             }
-            else{
-                console.log(seam)        
-            }
         };
         
-
-        seamDirection(start, 0);
-
+        seamDirection(startCol, 0);
+        return seam;
 
     };
 
-    var generateSeams = function(){
+    var compareSeam = function(a, b){
+          if (a.value < b.value) {
+            return -1;
+          }
+          if (a.value > b.value) {
+            return 1;
+          }
+          // a must be equal to b
+          return 0;
+    };
 
-        getSeam(10);
-        return;
+    var generateSeams = function(){
+        var seams = [];
+
+
         for (var col = 0, cols = getWidth(); col < cols;  col += 1) {
-            var seam = [];
+            seams.push(getSeam(col));
+        }
+
+        seams.sort(compareSeam);
+
+        // loop all seams: if two or more uses the same pixels: delete the seam(s) with lower value
+        for(var i = 0, x = seams.length; i < x; i += 1){
+
+            var lowerValueSeam = seams[i];
+
+            for(var j = (i + 1) , y = seams.length; j < y; j += 1){
+
+                var higherValueSeam = seams[i];
+            
+                for(var col = 0, cols = lowerValueSeam.col.length; col < cols; col += 1){
+                    
+                    if(lowerValueSeam.col[col] === higherValueSeam.col[col]){
+                        seams[j].containDuplicate = true;
+                        break;
+                    }
+                }            
+            }
+            break; 
 
         }
+
+        var unique = 0;
+        var dubplicate = 0;
+
+        for(var i = 0, x = seams.length; i < x; i += 1){
+            if(seams[i].containDuplicate === true){
+                dubplicate += 1;
+            }
+            else{
+                unique += 1;
+            }
+        }              
+
+        console.log(unique);
+        console.log(dubplicate);
 
 
     };
