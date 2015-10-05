@@ -92,11 +92,20 @@ var seamMatrix = function(width, height){
 			matrix[row] = [];
 
 			for(var col = 0; col < width; col += 1){
-				matrix[row][col] = false;			
+				matrix[row][col] = seamMatrixItem();			
 			} 
 
 		} 
 	};
+
+	var getRGB = function(row, col){
+		return matrix[row][col].getRGB();
+	};
+
+	var setRGB = function(row, col, r, g, b){
+		matrix[row][col].setRGB(r, g, b);
+	};
+
 
 	var init = function(){
 		setMatrix();
@@ -106,7 +115,9 @@ var seamMatrix = function(width, height){
 	return{
 		getWidth: getWidth,
 		getHeight: getHeight,
-		getMatrix: getMatrix
+		getMatrix: getMatrix,
+		getRGB: getRGB,
+		setRGB: setRGB,
 	};
 
 };

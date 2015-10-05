@@ -1,35 +1,33 @@
 var lwip = require('lwip');
 var q = require('q');
 
+var seamMatrixModule = require('./seamcarver/matrix');
+
 var seamCarver = function(lwipImage){
 
-    var width = lwipImage.width();
-    var height = lwipImage.height();
+    var matrix = seamMatrixModule.seamMatrix(lwipImage.width(), lwipImage.height());
 
     var pixels = []
 
     var heatMap;
     var maxHeat;
 
-    var getWidth = function(){
-        return width;
-    };
-
-    var getHeight = function(){
-        return height;
-    };
 
     var setPixels = function(){
-        for (var x = 0, width = getWidth(); x < width;  x += 1) {
-            pixels[x] = [];
-            for (var y = 0, height = getHeight(); y < height;  y += 1) {
-                    pixels[x][y] = lwipImage.getPixel(x, y);
+
+        for (var x = 0, width = matrix.getWidth(); x < width;  x += 1) {
+
+            for (var y = 0, height = matrix.getHeight(); y < height;  y += 1) {
+
+                var rgba = lwipImage.getPixel(x, y);
+                matrix.setRGB(y, x, rgba.r, rgba.b, rgba.b);
+
             }
 
         }
     }
     setPixels();
-
+    return;
     var getPixel = function(x, y){
         //@TODO Validate params
         return pixels[x][y];
@@ -57,7 +55,7 @@ var seamCarver = function(lwipImage){
      * https://github.com/axemclion/seamcarving
      */
     var generateHeatMap = function(){
-
+        console.log('move heatMap to matrix')
         heatMap = [];
         var max = 0;
         for (var x = 0, width = getWidth(); x < width;  x += 1) {

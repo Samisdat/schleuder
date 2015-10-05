@@ -106,9 +106,33 @@ describe('SeamCarver Matrix', function() {
 		expect(matrix.length).to.equal(height);
 		expect(matrix[0].length).to.equal(width);
 
+		expect(matrix[0][0].getRGB).to.be.a('function');
+		expect(matrix[0][0].setRGB).to.be.a('function');
+		expect(matrix[0][0].getHeat).to.be.a('function');
+		expect(matrix[0][0].setHeat).to.be.a('function');
+		expect(matrix[0][0].getMemberInSeams).to.be.a('function');
+		expect(matrix[0][0].isMemberOfSeam).to.be.a('function');
+		expect(matrix[0][0].markAsMemberInSeams).to.be.a('function');
+
+
+
 	});
 
-	it('can be filled with members', function() {
+	it('members can be set', function() {
+
+		var seamMatrix = seamMatrixModule.seamMatrix(10, 10);
+
+		var r = 10;
+		var g = 11;
+		var b = 12;
+
+		seamMatrix.setRGB(0, 0, r, g, b);
+
+		var rgb = seamMatrix.getRGB(0, 0);
+
+		expect(rgb.r).to.equal(r);
+		expect(rgb.g).to.equal(g);
+		expect(rgb.b).to.equal(b);
 
 	});
 
