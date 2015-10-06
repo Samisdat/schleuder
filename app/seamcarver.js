@@ -1,11 +1,11 @@
 var lwip = require('lwip');
 var q = require('q');
 
-var seamMatrixModule = require('./seamcarver/matrix');
+var seamMatrix = require('./seamcarver/matrix');
 
 var seamCarver = function(lwipImage){
 
-    var matrix = seamMatrixModule.seamMatrix(lwipImage.width(), lwipImage.height());
+    var matrix = seamMatrix(lwipImage.width(), lwipImage.height());
 
     var fillMatrix = function(){
 
