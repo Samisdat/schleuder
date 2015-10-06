@@ -7,13 +7,7 @@ var seamCarver = function(lwipImage){
 
     var matrix = seamMatrixModule.seamMatrix(lwipImage.width(), lwipImage.height());
 
-    var pixels = []
-
-    var heatMap;
-    var maxHeat;
-
-
-    var setPixels = function(){
+    var fillMatrix = function(){
 
         for (var x = 0, width = matrix.getWidth(); x < width;  x += 1) {
 
@@ -26,74 +20,11 @@ var seamCarver = function(lwipImage){
 
         }
     }
-    setPixels();
-    return;
-    var getPixel = function(x, y){
-        //@TODO Validate params
-        return pixels[x][y];
-    };
-
-    var putPixel = function(x, y, color){
-
-    };
-
-    var copyImage = function(){
-
-    };
-
-    var b = function(x, y){
-        if (x < 0 || y < 0 || x >= getWidth() || y >= getHeight()) {
-            return 0;
-        }
-        var pixel = getPixel(x, y);
-        return (pixel.r + pixel.g + pixel.b);
-    }
-
-
-    /**
-     * Heatmap taken from 
-     * https://github.com/axemclion/seamcarving
-     */
-    var generateHeatMap = function(){
-        console.log('move heatMap to matrix')
-        heatMap = [];
-        var max = 0;
-        for (var x = 0, width = getWidth(); x < width;  x += 1) {
-            var heatMapRow = [];
-            for (var y = 0; y < getHeight(); y++) {
-                var xenergy = b(x - 1, y - 1) + 2 * b(x - 1, y) + b(x - 1, y + 1) - b(x + 1, y - 1) - 2 * b(x + 1, y) - b(x + 1, y + 1)
-                var yenergy = b(x - 1, y - 1) + 2 * b(x, y - 1) + b(x + 1, y - 1) - b(x - 1, y + 1) - 2 * b(x, y + 1) - b(x + 1, y + 1)
-                heatMapRow.push(Math.sqrt(xenergy * xenergy + yenergy * yenergy));
-            }
-            heatMap.push(heatMapRow);
-        }
-
-        // the heatmap implenentation from https://github.com/axemclion/seamcarving generates ver high values for all four edges
-        // for now: just replace all edge pixels with their neibours
-        heatMap[0] = heatMap[1];
-        heatMap[(heatMap.length-1)] = heatMap[(heatMap.length-2)];
-
-        for (var row = 0, rows = getHeight(); row < rows;  row += 1) {
-            heatMap[row][0] = heatMap[row][1];
-            heatMap[row][(heatMap.length-1)] = heatMap[row][(heatMap.length-2)];
-        }
-    };
-
-    generateHeatMap();
-
-    var setMaxHeat = function(){
-        var maxHeatInRow = [];
-
-        for (var row = 0, rows = getHeight(); row < rows;  row += 1) {
-            maxHeatInRow.push(Math.max.apply(Math, heatMap[row]));
-        }
-
-        maxHeat = Math.max.apply(Math, maxHeatInRow);
-
-    };
-
-    setMaxHeat();
-
+    
+    fillMatrix();
+    matrix.generateHeatMap();
+    
+    
     var getSeam = function(startCol){
         var seam = {
             value: 0,
@@ -212,7 +143,7 @@ var seamCarver = function(lwipImage){
 
     };
 
-    generateSeams();
+    //generateSeams();
 
 
 
@@ -290,33 +221,35 @@ var seamCarver = function(lwipImage){
     };
 
     var getHeatMap = function(){
-        var deferred = q.defer();
-        var heatMapData = generateHeatMap();
         
-        var maxHeat = heatMapData.maxHeat;
-        var heatMap = heatMapData.heatMap;
+        var deferred = q.defer();
+        
+        var maxHeat = matrix.getMaxHeat();
 
-
-        lwip.create(getWidth(), getHeight(), {r:0, g:0, b:0}, function(err, blankImage){
+        lwip.create(matrix.getWidth(), matrix.getHeight(), {r:0, g:0, b:0}, function(err, blankImage){
 
             var batch = blankImage.batch();
-            for (var x = 0; x < blankImage.width(); x++) {
-                for (var y = 0; y < blankImage.height(); y++) {
-                    var color = parseInt(heatMap[x][y] / maxHeat * 255, 10);
-                    color = {r:color, g:color, b:color};
-
-                    batch.setPixel(x, y, color);
+            
+            for (var x = 0; x < matrix.getWidth(); x++) {
+                
+                for (var y = 0; y < matrix.getHeight(); y++) {
+                    
+                    var color = parseInt(matrix.getHeat(y, x) / maxHeat * 255, 10);
+                    batch.setPixel(x, y, {r:color, g:color, b:color});
+                    
                 }
+                
             }
+            
             batch.writeFile('/var/www/schleuder/public/seamcarver/heatmap.jpg', 'jpg', {quality:100}, function(error){
+                
                 deferred.resolve();
+                
             });
-
   
         });
 
         return deferred.promise;
-
 
     };
 
@@ -329,9 +262,8 @@ var seamCarver = function(lwipImage){
     };
 
     return {
-        getWidth: getWidth,
-        getHeight: getHeight,
-        initHeatMap:generateHeatMap,
+        getWidth: matrix.getWidth,
+        getHeight: matrix.getHeight,
         getHeatMap: getHeatMap,
         initSeams:initSeams,
         getSeams:getSeams,

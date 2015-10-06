@@ -9,5 +9,6 @@ lwip.open('/var/www/schleuder/raw-images/ballon-small.jpg', function(err, image)
 	//var seams = carved.initSeams();
 
 	//carved.getSeams();
+	carved.getHeatMap();
 
 });
