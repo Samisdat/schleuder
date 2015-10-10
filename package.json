@@ -33,6 +33,7 @@
     "morgan": "~1.6.1",
     "nano": "^6.1.5",
     "node-sass-middleware": "0.8.0",
+    "progress": "^1.1.8",
     "q": "^1.4.1",
     "request": "^2.64.0",
     "serve-favicon": "~2.3.0"

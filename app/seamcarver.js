@@ -3,6 +3,7 @@ var q = require('q');
 
 var seamMatrix = require('./seamcarver/matrix');
 
+var ProgressBar = require('progress');
 var seamCarver = function(lwipImage){
 
     var matrix = seamMatrix(lwipImage.width(), lwipImage.height());
@@ -221,10 +222,17 @@ var seamCarver = function(lwipImage){
     };
 
     var getHeatMap = function(){
-        
+
         var deferred = q.defer();
         
         var maxHeat = matrix.getMaxHeat();
+
+        var bar = new ProgressBar(' draw heatmap [:bar] :percent :etas :elapsed', {
+            complete: '=',
+            incomplete: ' ',
+            total: matrix.getWidth() * matrix.getHeight()
+        });
+
 
         lwip.create(matrix.getWidth(), matrix.getHeight(), {r:0, g:0, b:0}, function(err, blankImage){
 
@@ -236,7 +244,7 @@ var seamCarver = function(lwipImage){
                     
                     var color = parseInt(matrix.getHeat(y, x) / maxHeat * 255, 10);
                     batch.setPixel(x, y, {r:color, g:color, b:color});
-                    
+                    bar.tick();
                 }
                 
             }
