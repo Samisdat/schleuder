@@ -1,4 +1,4 @@
-var seamMatrixItem = function(){
+var seamMatrixItem = function(row, col){
 
 	var rgb = {
 		r: 0,
@@ -15,6 +15,8 @@ var seamMatrixItem = function(){
 		return rgb;
 		
 	};
+	
+	var deleted = false;
 
 	var setRGB = function(r, g, b){
 
@@ -63,6 +65,22 @@ var seamMatrixItem = function(){
 		memberInSeams.push(seam);
 		
 	};
+	
+	var isDeleted = function(){
+    	return (deleted === true);
+	};
+	
+	var markAsDeleted = function(){
+    	deleted = true;
+	};
+	
+	var getRow = function(){
+    	return row;
+	};
+
+	var getCol = function(){
+    	return col;    	
+	};
 
 	return{
 		getRGB: getRGB,
@@ -71,7 +89,11 @@ var seamMatrixItem = function(){
 		setHeat: setHeat,
 		getMemberInSeams: getMemberInSeams,
 		isMemberOfSeam: isMemberOfSeam,
-		markAsMemberInSeams: markAsMemberInSeams
+		markAsMemberInSeams: markAsMemberInSeams,
+		getRow: getRow,
+		getCol: getCol,
+		isDeleted: isDeleted,
+		markAsDeleted:markAsDeleted
 	};
 
 };

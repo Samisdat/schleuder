@@ -3,6 +3,7 @@ var q = require('q');
 var ProgressBar = require('progress');
 
 var seamMatrixItem = require('./item');
+var aSeam = require('./seam');
 
 var seamMatrix = function(width, height){
 
@@ -37,7 +38,7 @@ var seamMatrix = function(width, height){
 
 			for(var col = 0; col < width; col += 1){
     			
-				matrix[row][col] = seamMatrixItem();			
+				matrix[row][col] = seamMatrixItem(row, col);			
 				
 			} 
 
@@ -79,6 +80,28 @@ var seamMatrix = function(width, height){
 		matrix[row][col].setHeat(heat);
 		
 	};
+
+    /**
+     * Proxy Matrix Items method
+     */  
+    var isDeleted = function(row, col){
+        return matrix[row][col].isDeleted();
+    };
+
+    /**
+     * Proxy Matrix Items method
+     */  
+    var markAsDeleted = function(row, col){
+        return matrix[row][col].markAsDeleted();        
+    };
+
+
+	var getItem = function(row, col){
+    	
+		return matrix[row][col];
+		
+	};
+
 
     var getMaxHeat = function(){
         
@@ -151,7 +174,7 @@ var seamMatrix = function(width, height){
      */
     var generateHeatMap = function(){
 
-        var bar = new ProgressBar(' generate heatmap [:bar] :percent :etas :elapsed', {
+        var bar = new ProgressBar(' generate heatmap [:bar] :percent :etas :elapsed ', {
             complete: '=',
             incomplete: ' ',
             total: getWidth() * getHeight()
@@ -174,6 +197,68 @@ var seamMatrix = function(width, height){
         setMaxHeat();
 
     };
+    
+    var compareSeam = function(a, b){
+          if (a.getValue() < b.getValue()) {
+            return -1;
+          }
+          if (a.getValue() > b.getValue()) {
+            return 1;
+          }
+          // a must be equal to b
+          return 0;
+    };    
+    
+    var generateSeams = function(){
+        
+        var seams = [];
+        for(var col = 1, cols = getWidth(); col < cols; col += 1){
+            seams.push(
+                aSeam( col, getHeat(0, col))
+            );
+        }
+
+        for(var row = 1, rows = getHeight(); row < rows; row += 1){
+            for(var i = 0, x = seams.length; i < x; i += 1){
+                var seam = seams[i];
+                var last = seam.getLast();
+    
+                var left = (last > 0) ? getHeat(row, last - 1) : Number.MAX_VALUE;
+                var center = getHeat(row, last );
+                var right = (last < (getWidth() - 1)) ? getHeat(row, last + 1) : Number.MAX_VALUE;
+                    
+                if(center <= left && center <= right){
+                    if(center === left){
+                        //console.log(center, left)
+                        //console.log('center and left are tie');
+                    }
+                    if(center === right){
+                        //console.log(center, right)
+                        //console.log('center and right are tie');
+                    }
+                    //console.log('dir center');
+                    seam.addRow(last, getHeat(row, last));
+                }
+                else if(left < center && left <= right){
+                    if(left === right){
+                        //console.log(left, right)
+                        //console.log('right and left are tie');
+                    }
+
+                    //console.log('dir left');
+                    seam.addRow( (last - 1), getHeat(row, (last - 1)));
+                }
+                else if(right < center && right < left){
+                    //console.log('dir right');
+                    seam.addRow( (last + 1), getHeat(row, (last + 1)));
+                }
+            }
+        } 
+        
+        seams.sort(compareSeam);        
+        
+        return seams;        
+    };
 
 	var init = function(){
     	
@@ -191,7 +276,11 @@ var seamMatrix = function(width, height){
 		generateHeatMap: generateHeatMap,
 		getRGB: getRGB,
 		setRGB: setRGB,
-        getHeat: getHeat
+        getHeat: getHeat,
+        getItem: getItem,
+ 		isDeleted: isDeleted,
+		markAsDeleted:markAsDeleted,       
+        generateSeams:generateSeams 
 
 	};
 
