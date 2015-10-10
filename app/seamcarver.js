@@ -11,7 +11,7 @@ var seamCarver = function(lwipImage){
     var matrix = seamMatrix(lwipImage.width(), lwipImage.height());
 
     var fillMatrix = function(){
-
+        console.time('fillMatrix');    
         for (var x = 0, width = matrix.getWidth(); x < width;  x += 1) {
 
             for (var y = 0, height = matrix.getHeight(); y < height;  y += 1) {
@@ -22,6 +22,8 @@ var seamCarver = function(lwipImage){
             }
 
         }
+        console.timeEnd('fillMatrix');    
+        
     }
     
     fillMatrix();
@@ -94,36 +96,49 @@ var seamCarver = function(lwipImage){
                 }
             }
         }
+        
+        var seamLessMatrix = [];
+        
+        for(var row = 0, rows = matrix.getHeight(); row < rows; row +=1){
+            var seamLessRow = [];
+            for(var col = 0, cols = matrix.getWidth(); col < cols; col +=1){
+                if(true === matrix.isDeleted(row, col)){
+                    continue;
+                }
 
+                var color = matrix.getRGB(row, col);
+
+                seamLessRow.push(color);
+
+            }
+            
+            seamLessMatrix.push(seamLessRow);
+        }
+        /*        
         var bar = new ProgressBar(' draw image [:bar] :percent :etas :elapsed', {
             complete: '=',
             incomplete: ' ',
             total: (matrix.getWidth() - usableSeams) * matrix.getHeight()
         });
+        */
+        console.time('drawImage');
 
-        lwip.create((matrix.getWidth() - usableSeams), matrix.getHeight(), {r:0, g:255, b:0}, function(err, blankImage){
+        lwip.create(seamLessMatrix[0].length, seamLessMatrix.length, {r:0, g:255, b:0}, function(err, blankImage){
 
             var batch = blankImage.batch();
 
+            for(var row = 0, rows = seamLessMatrix.length; row < rows; row +=1){
+                for(var col = 0, cols = seamLessMatrix[0].length; col < cols; col +=1){
 
-            for(var row = 0, rows = matrix.getHeight(); row < rows; row +=1){
-                var seamCol = 0;
-                for(var col = 0, cols = (matrix.getWidth() - usableSeams); col < cols; col +=1){
-                    bar.tick();
-                    if(true === matrix.isDeleted(row, col)){
-                        seamCol += 1;
-                        continue;
-                    }
-
-                    var color = matrix.getRGB(row, seamCol);
-                    batch.setPixel(seamCol, row, color);
-                    seamCol += 1;
+                    var color = seamLessMatrix[row][col]
+                    batch.setPixel(col, row, color);
                 }
             }
                         
             batch.writeFile('/var/www/schleuder/public/seamcarver/seams.jpg', 'jpg', {quality:100}, function(error){
                 
-                console.log('done')                
+                console.timeEnd('drawImage');
+           
             });
   
         });

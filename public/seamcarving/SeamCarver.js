@@ -20,7 +20,6 @@ function(msg){
  */
 function SeamCarver(image){
     log("Seam Carver initialized");
-    console.log("Seam Carver initialized");
     this.image = image;
     this.newImage = [];
 }
@@ -104,7 +103,7 @@ SeamCarver.prototype.initSeams = function(){
         yseam[x] = [];
         yseam[x][ylen] = x;
     }
-    
+
     // sort the last row of the seams
     for (var i = 0; i < yseam.length; i++) {
         for (var j = i + 1; j < yseam.length; j++) {
@@ -115,6 +114,8 @@ SeamCarver.prototype.initSeams = function(){
             }
         }
     }
+
+    console.log(JSON.stringify(yseam))    
     
     // get the other rows of the seams
     for (var x = 0; x < yseam.length; x++) {
@@ -141,12 +142,18 @@ SeamCarver.prototype.initSeams = function(){
             
             // Choose the least energy
             yseam[x][y] = hx0 < hx1 ? (hx0 < hx2 ? x0 : x2) : (hx1 < hx2 ? x1 : x2);
+            if(100 === x && 100 === y){
+                console.log('x1', x1)
+               console.log(hx0, ' - ' ,  hx1)    
+            }
+
             this.heatMap[yseam[x][y]][y] = NaN;
         }
     }
     
     log("Seams calculated");
     this.seams = yseam;
+
     return this;
 }
 
@@ -169,7 +176,6 @@ SeamCarver.prototype.getHeatMap = function(){
 
 SeamCarver.prototype.getSeams = function(){
     this.seams || this.initSeams();
-
     this.copyImage();
     var color = 255;
     var step = 1;//parseInt(color / this.image.width);
@@ -178,7 +184,6 @@ SeamCarver.prototype.getSeams = function(){
             this.putPixel(this.seams[x][y], y, parseInt("0x" + color + color + color, 16));
         }
         color = (color - step < 0) ? 255 : color - step;
-        console.log(color)
     }
     
     return this.newImage;

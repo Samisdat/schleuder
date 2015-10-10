@@ -174,12 +174,7 @@ var seamMatrix = function(width, height){
      */
     var generateHeatMap = function(){
 
-        var bar = new ProgressBar(' generate heatmap [:bar] :percent :etas :elapsed ', {
-            complete: '=',
-            incomplete: ' ',
-            total: getWidth() * getHeight()
-        });
-
+        console.time('generateHeatMap');    
 
         for (var x = 0, width = getWidth(); x < width;  x += 1) {
         
@@ -188,13 +183,15 @@ var seamMatrix = function(width, height){
                 var xenergy = b(x - 1, y - 1) + 2 * b(x - 1, y) + b(x - 1, y + 1) - b(x + 1, y - 1) - 2 * b(x + 1, y) - b(x + 1, y + 1)
                 var yenergy = b(x - 1, y - 1) + 2 * b(x, y - 1) + b(x + 1, y - 1) - b(x - 1, y + 1) - 2 * b(x, y + 1) - b(x + 1, y + 1)
                 setHeat(y, x, Math.sqrt(xenergy * xenergy + yenergy * yenergy) );
-                bar.tick();
                 
             }
         }
         
         correctHeatMap();
         setMaxHeat();
+        
+        console.timeEnd('generateHeatMap');
+
 
     };
     
@@ -210,6 +207,8 @@ var seamMatrix = function(width, height){
     };    
     
     var generateSeams = function(){
+        
+        console.time('generateSeams');
         
         var seams = [];
         for(var col = 1, cols = getWidth(); col < cols; col += 1){
@@ -256,7 +255,8 @@ var seamMatrix = function(width, height){
         } 
         
         seams.sort(compareSeam);        
-        
+        console.timeEnd('generateSeams');
+
         return seams;        
     };
 

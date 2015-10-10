@@ -81,7 +81,6 @@
             });
         }
         function drawImage(result){
-            console.log(result)
             var newImage = ctx.createImageData(imageData.width, imageData.height);
             for (var i = 0; i < result.length; i++) {
                 newImage.data[i] = result[i];
