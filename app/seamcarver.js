@@ -17,7 +17,7 @@ var seamCarver = function(lwipImage){
             for (var y = 0, height = matrix.getHeight(); y < height;  y += 1) {
 
                 var rgba = lwipImage.getPixel(x, y);
-                matrix.setRGB(y, x, rgba.r, rgba.b, rgba.b);
+                matrix.setRGB(y, x, rgba.r, rgba.g, rgba.b);
 
             }
 
