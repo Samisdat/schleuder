@@ -29,7 +29,7 @@ module.exports = function(grunt) {
         
         mocha_istanbul: {
             coverage: {
-                src: 'test' // a folder works nicely
+                src: 'test/**/*.js' // a folder works nicely
             },
             coverageSpecial: {
                 src: ['testSpecial/*/*.js', 'testUnique/*/*.js'], // specifying file patterns works as well
