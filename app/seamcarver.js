@@ -1,31 +1,47 @@
 var lwip = require('lwip');
 var q = require('q');
+var fs = require('fs');
+
+var Canvas = require('canvas');
+var Image = Canvas.Image
 
 var seamMatrix = require('./seamcarver/matrix');
 var aSeam = require('./seamcarver/seam');
 
 
 var ProgressBar = require('progress');
-var seamCarver = function(lwipImage){
+var seamCarver = function(canvas, ctx){
+    
+    var start = new Date;
+    var matrix = seamMatrix(ctx.canvas.width, ctx.canvas.height);
 
-    var matrix = seamMatrix(lwipImage.width(), lwipImage.height());
+    var imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height).data;
+    
+    var getPixel = function(x, y){
+        var base = (y * ctx.canvas.width + x) * 4;
+        return {
+            r: imageData[base + 0],
+            g: imageData[base + 1],
+            b: imageData[base + 2],
+            a: imageData[base + 3]
+        };
+    }
 
     var fillMatrix = function(){
-        console.time('fillMatrix');    
+        console.time('fillMatrix slow');    
+        
         for (var x = 0, width = matrix.getWidth(); x < width;  x += 1) {
 
             for (var y = 0, height = matrix.getHeight(); y < height;  y += 1) {
-
-                var rgba = lwipImage.getPixel(x, y);
-                matrix.setRGB(y, x, rgba.r, rgba.g, rgba.b);
-
+                var color = getPixel(x, y);
+                matrix.setRGB(y, x, color.r, color.g, color.b);
             }
-
         }
-        console.timeEnd('fillMatrix');    
+        
+        console.timeEnd('fillMatrix slow');    
         
     }
-    
+    console.log('fillMatrixCanvas')    
     fillMatrix();
     matrix.generateHeatMap();
     
@@ -35,34 +51,41 @@ var seamCarver = function(lwipImage){
         
         var maxHeat = matrix.getMaxHeat();
 
-        var bar = new ProgressBar(' draw heatmap [:bar] :percent :etas :elapsed', {
-            complete: '=',
-            incomplete: ' ',
-            total: matrix.getWidth() * matrix.getHeight()
-        });
+        var newImageData = [];
 
-        lwip.create(matrix.getWidth(), matrix.getHeight(), {r:0, g:0, b:0}, function(err, blankImage){
+        var setPixel = function(x, y, color){
+            var base = (y * matrix.getWidth() + x) * 4;
+            newImageData[base + 0] = color.r;
+            newImageData[base + 1] = color.g;
+            newImageData[base + 2] = color.b;
+            newImageData[base + 3] = 255;
+        };
 
-            var batch = blankImage.batch();
+        for (var x = 0; x < matrix.getWidth(); x++) {
             
-            for (var x = 0; x < matrix.getWidth(); x++) {
+            for (var y = 0; y < matrix.getHeight(); y++) {
                 
-                for (var y = 0; y < matrix.getHeight(); y++) {
-                    
-                    var color = parseInt(matrix.getHeat(y, x) / maxHeat * 255, 10);
-                    batch.setPixel(x, y, {r:color, g:color, b:color});
-                    bar.tick();
-                }
-                
+                var color = parseInt(matrix.getHeat(y, x) / maxHeat * 255, 10);
+                setPixel(x, y, {r:color, g:color, b:color});
             }
             
-            batch.writeFile('/var/www/schleuder/public/seamcarver/heatmap.jpg', 'jpg', {quality:100}, function(error){
-                
-                deferred.resolve();
-                
+        }
+        
+        var newImage = ctx.createImageData(matrix.getWidth(), matrix.getHeight());
+        for (var i = 0; i < newImageData.length; i++) {
+            newImage.data[i] = newImageData[i];
+        }
+        
+        ctx.putImageData(newImage, 0, 0);
+          ctx.canvas.toBuffer(function(err, buf){
+              console.log(err)
+              console.log('/var/www/schleuder/public/seamcarver/heatmap-ctx.jpg')
+            fs.writeFile('/var/www/schleuder/public/seamcarver/heatmap-ctx.jpg', buf, function(err){
+                              console.log(err)
+              console.log('Resized and saved in %dms', new Date - start);
             });
-  
-        });
+          });
+
 
         return deferred.promise;
 
@@ -70,33 +93,44 @@ var seamCarver = function(lwipImage){
 
     var getSeams = function(){
 
-        var seams = matrix.generateSeams();
+        var seamLessMatrix = matrix.getReduced();
         
-        var usableSeams = 0;
-        
-        for(var i = 0, x = seams.length; i < x; i += 1){
+        var newImageData = [];
 
-            var useSeam = true;
-            
-            for(var row = 0, rows = matrix.getHeight(); row < rows; row += 1){
-                var col = seams[i].getRow(row);
+        var setPixel = function(x, y, color){
+            var base = (y * matrix.getWidth() + x) * 4;
+            newImageData[base + 0] = color.r;
+            newImageData[base + 1] = color.g;
+            newImageData[base + 2] = color.b;
+            newImageData[base + 3] = 255;
+        };
 
-                if(true === matrix.isDeleted(row, col)){
-                    useSeam = false;
-                    break;   
-                }
-            }
+        for (var x = 0; x < seamLessMatrix.getWidth(); x++) {
             
-            if(true === useSeam){
-                usableSeams += 1;
+            for (var y = 0; y < seamLessMatrix.getHeight(); y++) {
                 
-                for(var row = 0, rows = matrix.getHeight(); row < rows; row += 1){
-                    var col = seams[i].getRow(row);
-                    matrix.markAsDeleted(row, col);
-                }
+                var color = seamLessMatrix.getRGB(y, x);
+                setPixel(x, y, {r:color, g:color, b:color});
             }
+            
         }
         
+        var newImage = ctx.createImageData(seamLessMatrix.getWidth(), seamLessMatrix.getHeight());
+        for (var i = 0; i < newImageData.length; i++) {
+            newImage.data[i] = newImageData[i];
+        }
+        
+        ctx.putImageData(newImage, 0, 0);
+          ctx.canvas.toBuffer(function(err, buf){
+              console.log(err)
+              console.log('/var/www/schleuder/public/seamcarver/seamless-ctx.jpg')
+            fs.writeFile('/var/www/schleuder/public/seamcarver/seamless-ctx.jpg', buf, function(err){
+                              console.log(err)
+              console.log('Resized and saved in %dms', new Date - start);
+            });
+          });
+        
+        return;
         var seamLessMatrix = [];
         
         for(var row = 0, rows = matrix.getHeight(); row < rows; row +=1){

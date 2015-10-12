@@ -259,6 +259,54 @@ var seamMatrix = function(width, height){
 
         return seams;        
     };
+    
+    var getReduced = function(){
+        var seams = generateSeams();
+        
+        var usableSeams = 0;
+        
+        for(var i = 0, x = seams.length; i < x; i += 1){
+
+            var useSeam = true;
+            
+            for(var row = 0, rows = getHeight(); row < rows; row += 1){
+                var col = seams[i].getRow(row);
+
+                if(true === isDeleted(row, col)){
+                    useSeam = false;
+                    break;   
+                }
+            }
+            
+            if(true === useSeam){
+                usableSeams += 1;
+                
+                for(var row = 0, rows = getHeight(); row < rows; row += 1){
+                    var col = seams[i].getRow(row);
+                    markAsDeleted(row, col);
+                }
+            }
+        }
+            
+        console.log(usableSeams);
+        
+        var seamLessMatrix = seamMatrix(getWidth() - usableSeams, getHeight());
+
+        for(var row = 0, rows = getHeight(); row < rows; row +=1){
+            var seamCol = 0;
+            for(var col = 0, cols = getWidth(); col < cols; col +=1){
+                if(true === isDeleted(row, col)){
+                    continue;
+                }
+
+                var color = getRGB(row, col);
+                seamLessMatrix.setRGB(row, seamCol, color.r, color.g, color.b);
+                seamCol += 1; 
+            }
+        }
+
+        return seamLessMatrix;
+    };
 
 	var init = function(){
     	
@@ -280,7 +328,8 @@ var seamMatrix = function(width, height){
         getItem: getItem,
  		isDeleted: isDeleted,
 		markAsDeleted:markAsDeleted,       
-        generateSeams:generateSeams 
+        generateSeams:generateSeams,
+        getReduced:getReduced
 
 	};
 
