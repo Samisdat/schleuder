@@ -7,18 +7,28 @@ var Pixel = function(x, y, r, g, b, a) {
 };
 
 Pixel.prototype.getX = function(){
-    return this.position.getX();  
+    return this.position.getX();
 };
 
 Pixel.prototype.getY = function(){
-    return this.position.getY();  
+    return this.position.getY();
 };
 
 Pixel.prototype.getRgb = function(){
-    return this.color.rgb();  
+    return this.color.getRgb();
 };
 
+Pixel.prototype.setRgb = function(r, g, b){
+    return this.color.setRgb(r, g, b);
+};
+
+
 Pixel.prototype.getRgba = function(){
-    return this.color.rgba();  };
+    return this.color.getRgba();
+};
+
+Pixel.prototype.setRgba = function(r, g, b, a){
+    return this.color.getRgba(r, g, b, a);
+};
 
 module.exports = Pixel;
