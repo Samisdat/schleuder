@@ -37,15 +37,15 @@ Matrix.prototype.getHeight = function(){
 /**
  * Proxy Matrix Items method
  */
-Matrix.prototype.getRgb = function(row, col){
-    return this.matrix[row][col].getRgb();
+Matrix.prototype.getColor = function(row, col){
+    return this.matrix[row][col].getColor();
 };
 
 /**
  * Proxy Matrix Items method
  */
-Matrix.prototype.setRgb = function(row, col, r, g, b){
-    this.matrix[row][col].setRgb(r, g, b);
+Matrix.prototype.setColor = function(row, col, r, g, b, a){
+    this.matrix[row][col].setColor(r, g, b, a);
 };
 
 /**
@@ -102,7 +102,7 @@ Matrix.prototype.setMaxHeat = function(){
 
 };
 
-Matrix.prototype.sumRgb = function(x, y){
+Matrix.prototype.sumColorChanels = function(x, y){
 
     if (x < 0 || y < 0 || x >= this.getWidth() || y >= this.getHeight()) {
 
@@ -110,8 +110,8 @@ Matrix.prototype.sumRgb = function(x, y){
 
     }
 
-    var color = this.getRgb(y, x);
-    color.a = 255;
+    var color = this.getColor(y, x);
+
     return (color.r + color.g + color.b  + color.a);
 
 }
@@ -149,8 +149,8 @@ Matrix.prototype.generateHeatMap = function(){
 
         for (var y = 0; y < this.getHeight(); y++) {
 
-            var xenergy = this.sumRgb(x - 1, y - 1) + 2 * this.sumRgb(x - 1, y) + this.sumRgb(x - 1, y + 1) - this.sumRgb(x + 1, y - 1) - 2 * this.sumRgb(x + 1, y) - this.sumRgb(x + 1, y + 1)
-            var yenergy = this.sumRgb(x - 1, y - 1) + 2 * this.sumRgb(x, y - 1) + this.sumRgb(x + 1, y - 1) - this.sumRgb(x - 1, y + 1) - 2 * this.sumRgb(x, y + 1) - this.sumRgb(x + 1, y + 1)
+            var xenergy = this.sumColorChanels(x - 1, y - 1) + 2 * this.sumColorChanels(x - 1, y) + this.sumColorChanels(x - 1, y + 1) - this.sumColorChanels(x + 1, y - 1) - 2 * this.sumColorChanels(x + 1, y) - this.sumColorChanels(x + 1, y + 1)
+            var yenergy = this.sumColorChanels(x - 1, y - 1) + 2 * this.sumColorChanels(x, y - 1) + this.sumColorChanels(x + 1, y - 1) - this.sumColorChanels(x - 1, y + 1) - 2 * this.sumColorChanels(x, y + 1) - this.sumColorChanels(x + 1, y + 1)
             this.setHeat(y, x, Math.sqrt(xenergy * xenergy + yenergy * yenergy) );
 
         }

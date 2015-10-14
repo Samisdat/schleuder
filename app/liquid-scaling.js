@@ -32,7 +32,7 @@ var seamCarver = function(canvas, ctx){
 
             for (var y = 0, height = matrix.getHeight(); y < height;  y += 1) {
                 var color = getPixel(x, y);
-                matrix.setRgb(y, x, color.r, color.g, color.b);
+                matrix.setColor(y, x, color.r, color.g, color.b, color.a);
             }
         }
 

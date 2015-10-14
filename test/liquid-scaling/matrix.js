@@ -26,24 +26,27 @@ describe('Matrix', function() {
 
     });
 
-    it('can get/set rgb', function() {
+    it('can get/set color', function() {
 
         var matrix = new Matrix(4, 3);
 
-        var rgb = matrix.getRgb(1, 1);
-        expect(rgb.r).to.be.undefined;
-        expect(rgb.g).to.be.undefined;
-        expect(rgb.b).to.be.undefined;
+        var rgba = matrix.getColor(1, 1);
+        expect(rgba.r).to.be.undefined;
+        expect(rgba.g).to.be.undefined;
+        expect(rgba.b).to.be.undefined;
+        expect(rgba.a).to.be.undefined;
 
         var r = 10;
         var g = 11;
         var b = 12;
+        var a = 13;
 
-        matrix.setRgb(1, 1, r, g, b);
-        var rgb = matrix.getRgb(1, 1);
-        expect(rgb.r).to.equal(r);
-        expect(rgb.g).to.equal(g);
-        expect(rgb.b).to.equal(b);
+        matrix.setColor(1, 1, r, g, b, a);
+        var rgba = matrix.getColor(1, 1);
+        expect(rgba.r).to.equal(r);
+        expect(rgba.g).to.equal(g);
+        expect(rgba.b).to.equal(b);
+        expect(rgba.a).to.equal(a);
 
 	});
 
