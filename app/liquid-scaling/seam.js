@@ -3,6 +3,8 @@ var Seam = function(startCol, startHeat) {
     this.members = [startCol];
     this.value = startHeat;
 
+    this.unique = true;
+
 };
 
 Seam.prototype.getValue = function(){
@@ -29,5 +31,24 @@ Seam.prototype.getRow = function(row){
     return this.members[row];
 
 };
+Seam.prototype.getRows = function(){
+
+    return this.members.length;
+
+};
+
+
+Seam.prototype.isUnique = function(row){
+
+    return (true === this.unique);
+
+};
+
+Seam.prototype.markDuplicate = function(row){
+
+    this.unique = false;
+
+};
+
 
 module.exports = Seam;

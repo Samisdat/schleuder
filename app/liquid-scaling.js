@@ -91,7 +91,63 @@ var seamCarver = function(canvas, ctx){
 
     var getSeams = function(){
 
+        console.time('drawImage');
+
+        console.log(matrix.getWidth())
+
         var seamLessMatrix = matrix.getReduced();
+
+        seamLessMatrix.generateHeatMap();
+        seamLessMatrix = seamLessMatrix.getReduced();
+
+        seamLessMatrix.generateHeatMap();
+        seamLessMatrix = seamLessMatrix.getReduced();
+
+        seamLessMatrix.generateHeatMap();
+        seamLessMatrix = seamLessMatrix.getReduced();
+
+        seamLessMatrix.generateHeatMap();
+        seamLessMatrix = seamLessMatrix.getReduced();
+
+        seamLessMatrix.generateHeatMap();
+        seamLessMatrix = seamLessMatrix.getReduced();
+
+        seamLessMatrix.generateHeatMap();
+        seamLessMatrix = seamLessMatrix.getReduced();
+
+        seamLessMatrix.generateHeatMap();
+        seamLessMatrix = seamLessMatrix.getReduced();
+
+        console.log(seamLessMatrix.getWidth())
+
+
+        lwip.create(seamLessMatrix.getWidth(), seamLessMatrix.getHeight(), {r:0, g:255, b:0}, function(err, blankImage){
+
+            var batch = blankImage.batch();
+
+            for(var row = 0, rows = seamLessMatrix.getHeight(); row < rows; row +=1){
+                for(var col = 0, cols = seamLessMatrix.getWidth(); col < cols; col +=1){
+
+                    var color = seamLessMatrix.getColor(row, col);
+                    color.a = 100;
+                    try{
+                        batch.setPixel(col, row, color);
+                    }
+                    catch(e){
+                        console.log(e)
+                    }
+
+                }
+            }
+
+            batch.writeFile('/var/www/schleuder/public/seamcarver/seams.jpg', 'jpg', {quality:100}, function(error){
+
+                console.timeEnd('drawImage');
+
+            });
+
+        });
+        return;
 
         var newImageData = [];
 
@@ -107,7 +163,7 @@ var seamCarver = function(canvas, ctx){
 
             for (var y = 0; y < seamLessMatrix.getHeight(); y++) {
 
-                var color = seamLessMatrix.getRGB(y, x);
+                var color = seamLessMatrix.getColor(y, x);
                 setPixel(x, y, {r:color, g:color, b:color});
             }
 
