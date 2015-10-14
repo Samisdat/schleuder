@@ -80,7 +80,7 @@ Matrix.prototype.getMaxHeat = function(){
     return this.maxHeat;
 };
 
-Matrix.prototype.setMaxHeat = function(){
+var setMaxHeat = function(){
 
     var maxHeatInRows = [];
 
@@ -117,7 +117,7 @@ Matrix.prototype.sumColorChanels = function(x, y){
 
 // the heatmap implenentation from https://github.com/axemclion/seamcarving generates ver high values for all four edges
 // for now: just replace all edge pixels with their neibours
-Matrix.prototype.correctHeatMap = function(){
+var correctHeatMap = function(){
 
     var lastRow = this.getHeight() - 1;
     var lastCol = this.getWidth() - 1;
@@ -155,8 +155,8 @@ Matrix.prototype.generateHeatMap = function(){
         }
     }
 
-    this.correctHeatMap();
-    this.setMaxHeat();
+    correctHeatMap.call(this);
+    setMaxHeat.call(this);
 
 };
 
