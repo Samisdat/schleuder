@@ -14,21 +14,12 @@ Pixel.prototype.getY = function(){
     return this.position.getY();
 };
 
-Pixel.prototype.getRgb = function(){
-    return this.color.getRgb();
+Pixel.prototype.getColor = function(){
+    return this.color.get();
 };
 
-Pixel.prototype.setRgb = function(r, g, b){
-    return this.color.setRgb(r, g, b);
-};
-
-
-Pixel.prototype.getRgba = function(){
-    return this.color.getRgba();
-};
-
-Pixel.prototype.setRgba = function(r, g, b, a){
-    return this.color.getRgba(r, g, b, a);
+Pixel.prototype.setColor = function(r, g, b, a){
+    return this.color.set(r, g, b, a);
 };
 
 module.exports = Pixel;
