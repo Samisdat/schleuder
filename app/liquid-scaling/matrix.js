@@ -111,8 +111,8 @@ Matrix.prototype.sumRgb = function(x, y){
     }
 
     var color = this.getRgb(y, x);
-
-    return (color.r + color.g + color.b);
+    color.a = 255;
+    return (color.r + color.g + color.b  + color.a);
 
 }
 
