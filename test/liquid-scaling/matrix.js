@@ -54,11 +54,11 @@ describe('Matrix', function() {
 
         var matrix = new Matrix(4, 3);
 
-		expect(matrix.getHeat(1, 1)).to.be.undefined;
+        expect(matrix.getHeat(1, 1)).to.be.undefined;
 
-		var heat = 10;
-		matrix.setHeat(1, 1, heat);
-		expect(matrix.getHeat(1,1)).to.be.equal(heat);
+        var heat = 10;
+        matrix.setHeat(1, 1, heat);
+        expect(matrix.getHeat(1,1)).to.be.equal(heat);
 
 	});
 
@@ -70,6 +70,48 @@ describe('Matrix', function() {
 
         matrix.markAsDeleted(1,1);
         expect(matrix.isDeleted(1,1)).to.be.true;
+
+    });
+
+    it('can sumColorChanels', function() {
+
+        var matrix = new Matrix(1, 1);
+
+        var r = 1;
+        var g = 2;
+        var b = 3;
+        var a = 4;
+
+        matrix.setColor(0, 0, r, g, b, a);
+
+        expect(matrix.sumColorChanels(0, 0)).to.be.equal(10);
+
+        expect(matrix.sumColorChanels(1, 0)).to.be.equal(0);
+        expect(matrix.sumColorChanels(0, 1)).to.be.equal(0);
+
+        expect(matrix.sumColorChanels(-1, 0)).to.be.equal(0);
+        expect(matrix.sumColorChanels(0, -1)).to.be.equal(0);
+
+    });
+
+    it('can getMaxHeat', function() {
+
+        var matrix = new Matrix(5, 5);
+
+        for (var x = 0, width = matrix.getWidth(); x < width;  x += 1) {
+
+            for (var y = 0; y < matrix.getHeight(); y++) {
+
+                matrix.setColor(y, x, 0, 0, 0, 0);
+
+            }
+        }
+        matrix.setColor(2, 2, 255, 255, 255, 255);
+
+        matrix.generateHeatMap();
+
+        /* very dummy test, but covers 100% of heatmap ;) */
+        expect(matrix.getMaxHeat()).to.be.equal(2040);
 
     });
 

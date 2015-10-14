@@ -93,7 +93,6 @@ Matrix.prototype.setMaxHeat = function(){
             maxHeatInRow.push(this.getHeat(row, col));
 
         }
-
         maxHeatInRows.push(Math.max.apply(Math, maxHeatInRow));
 
     }
