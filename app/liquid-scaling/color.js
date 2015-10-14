@@ -1,28 +1,12 @@
 var Color = function(r, g, b, a) {
+
     this.r = r;
     this.g = g;
     this.b = b;
     this.a = a;
 };
 
-Color.prototype.getRgb = function(){
-    return{
-        r:this.r,
-        g:this.g,
-        b:this.b
-    };
-};
-
-Color.prototype.setRgb = function(r, g, b){
-
-    this.r = r;
-    this.g = g;
-    this.b = b;
-
-};
-
-
-Color.prototype.getRgba = function(){
+Color.prototype.get = function(){
     return{
         r:this.r,
         g:this.g,
@@ -31,7 +15,7 @@ Color.prototype.getRgba = function(){
     };
 };
 
-Color.prototype.setRgba = function(r, g, b, a){
+Color.prototype.set = function(r, g, b, a){
 
     this.r = r;
     this.g = g;
