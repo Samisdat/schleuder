@@ -29,8 +29,26 @@ var jshint = {
 			globals: {
 			    "require": true,
 			    "module": true
-		  	}			
-		}        
+		  	}
+		}
+    },
+    app:{
+        src:[
+            'app/**/*.js',
+            'test/**/*.js'
+        ],
+		options: {
+			curly: true,
+			eqeqeq: true,
+			undef:true,
+			strict:false,
+			browser: false,
+			jquery: false,
+			globals: {
+			    "require": true,
+			    "module": true
+		  	}
+		}
     },
 	gruntfiles:{
 		src:[

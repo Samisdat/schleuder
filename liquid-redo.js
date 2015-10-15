@@ -24,8 +24,7 @@ img.onload = function(){
   ctx.drawImage(img, 0, 0, width, height);
 
   var liquidScaling = new LiquidScaling(ctx);
-  var heatMapCtx = liquidScaling.resize(290);
-
+  var heatMapCtx = liquidScaling.resize(250);
 
   heatMapCtx.canvas.toBuffer(function(err, buf){
     fs.writeFile(__dirname + '/public/seamcarver/redo.jpg', buf, function(){
