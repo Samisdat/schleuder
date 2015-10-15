@@ -3,43 +3,46 @@ var fs = require('fs');
 
 var Canvas = require('canvas')
 var Matrix = require('./matrix');
+var LiquidColor = require('./liquid-color');
 
-var fillMatrix = function(){
+var getColorsFromCanvasCtx = function(ctx){
 
-    this.matrix = new Matrix(this.ctx.canvas.width, this.ctx.canvas.height);
+    var imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height).data;
 
-    var imageData = this.ctx.getImageData(0, 0, this.ctx.canvas.width, this.ctx.canvas.height).data;
+    var colors = [];;
 
-    var width = this.ctx.canvas.width;
+    var getPixel = function(col, row){
+        var base = (row * ctx.canvas.width + col) * 4;
 
-    var getPixel = function(x, y){
-        var base = (y * width + x) * 4;
-        return {
-            r: imageData[base + 0],
-            g: imageData[base + 1],
-            b: imageData[base + 2],
-            a: imageData[base + 3]
-        };
+        return new LiquidColor(
+            imageData[base + 0],
+            imageData[base + 1],
+            imageData[base + 2],
+            imageData[base + 3]
+        );
     }
 
-    for (var x = 0, width = this.matrix.getWidth(); x < width;  x += 1) {
 
-        for (var y = 0, height = this.matrix.getHeight(); y < height;  y += 1) {
-            var color = getPixel(x, y);
-            this.matrix.setColor(y, x, color.r, color.g, color.b, color.a);
+    for (var row = 0, rows = ctx.canvas.height; row < rows;  row += 1) {
+
+        colors[row] = [];
+
+        for (var col = 0, cols = ctx.canvas.width; col < cols;  col += 1) {
+
+            colors[row].push(getPixel(col, row));
+
         }
     }
 
+    return colors;
 };
+
 
 var LiquidScaling = function(canvasContext) {
     this.ctx = canvasContext;
 
-    this.matrix;
+    this.matrix = new Matrix(getColorsFromCanvasCtx(this.ctx));
 
-    fillMatrix.call(this);
-
-    this.matrix.generateHeatMap();
 };
 
 
@@ -86,11 +89,9 @@ LiquidScaling.prototype.getHeatMap = function(){
 LiquidScaling.prototype.resize = function(width){
 
         var target = this.matrix.getWidth() - width;
-        this.matrix.generateSeams()
 
         while(this.matrix.getWidth() > width){
 
-            this.matrix.generateHeatMap();
             this.matrix = this.matrix.getReduced(width);
 
         }
