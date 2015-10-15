@@ -25,6 +25,8 @@ var Matrix = function(width, height) {
     this.maxHeat = 0;
     this.matrix = [];
 
+    this.seams;
+
     emptyMatrix.call(this);
 
 };
@@ -170,7 +172,9 @@ Matrix.prototype.generateHeatMap = function(){
 
 Matrix.prototype.generateSeams = function(){
 
-    console.time('generateSeams');
+    if(undefined !== this.seams){
+        return;
+    }
 
     var seams = new Seams();
 
@@ -218,30 +222,36 @@ Matrix.prototype.generateSeams = function(){
     }
 
     seams.filter();
-    console.timeEnd('generateSeams');
 
-    return seams;
+    this.seams = seams.getUnique();
+
 };
 
+Matrix.prototype.numberOfSeams = function(){
+    return this.seams.length;
+};
 
-Matrix.prototype.getReduced = function(){
-    var seams = this.generateSeams();
+Matrix.prototype.getReduced = function(width){
 
-    var deletableSeams = seams.getUnique();
+    this.generateSeams();
 
-    for(var i = 0, x = deletableSeams.length; i < x; i += 1){
+    var reduceBy = this.getWidth() - width;
+
+    if( reduceBy > this.seams.length){
+        reduceBy = this.seams.length;
+    }
+
+    for(var i = 0; i < reduceBy; i += 1){
 
         for(var row = 0, rows = this.getHeight(); row < rows; row += 1){
 
-            var col = deletableSeams[i].getRow(row);
+            var col = this.seams[i].getRow(row);
             this.markAsDeleted(row, col);
 
         }
     }
 
-    console.log(deletableSeams.length);
-
-    var seamLessMatrix = new Matrix((this.getWidth() - deletableSeams.length), this.getHeight());
+    var seamLessMatrix = new Matrix((this.getWidth() - reduceBy), this.getHeight());
 
     for(var row = 0, rows = this.getHeight(); row < rows; row +=1){
         var seamCol = 0;
