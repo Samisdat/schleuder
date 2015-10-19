@@ -5,66 +5,98 @@ var fs = require('fs');
 
 var q = require('q');
 
-/**
- * @TODO While all other actions get schleuderAction and cache is not compalitble
- * MayBe cache should be method of schleuderAction or schleuder
- * Or better: make read from cache an own route and when not cached: next()
- */
+var couch = require('../couch.js');
 
-var getRequestHash = function(requestPath){
+var Cache = function(request){
+    this.request = request;
 
-	var hash = crypto.createHash('sha1');
-	hash.update(requestPath);
-	
-	return hash.digest('hex');
+    this.hash;
 
 };
 
-var getCacheFileName = function(requestPath){
+Cache.prototype.getHash = function(){
 
-	var requestHash = getRequestHash(requestPath);
+    if(undefined !== this.hash){
+        return this.hash;
+    }
 
-	return __dirname + '/../../cache/' + requestHash;
+    var md5sum = crypto.createHash('md5');
+    this.hash = crypto.createHash('md5').update(this.request.originalUrl).digest("hex");
 
-};
-
-
-
-var from = function(requestPath){
-
-	var deferred = q.defer();	
-
-	var cacheFile = getCacheFileName(requestPath);
-
-	fs.readFile(cacheFile, function (err, data) {
-
-	  		if (err){
-  			deferred.reject();
-  		} 
-  		deferred.resolve(data);
-	});
-
-	return deferred.promise;	
+	return this.hash;
 
 };
 
-var to = function(requestPath, buffer){
-	var deferred = q.defer();	
+Cache.prototype.getCouch = function(){
 
-	var cacheFile = getCacheFileName(requestPath);
-	
-	fs.writeFile(cacheFile, buffer,  'binary',  function (err, data) {
-  		if (err){
-  			deferred.reject();
-  		} 
-  		deferred.resolve(data);
-	});
+	var deferred = q.defer();
 
-	return deferred.promise;	
+    var hash = this.getHash();
+
+    var checkCache = couch.get('/schleuder/_design/image/_view/hash', {
+        key: hash,
+        include_docs: true
+    });
+
+    checkCache.fail(function(json){
+        deferred.reject();
+    });
+
+    checkCache.then(function(json){
+
+        if(undefined === json.rows || 1 !== json.rows.length || undefined === json.rows[0].doc){
+            deferred.reject();
+        }
+        else{
+            deferred.resolve(json.rows[0].doc);
+        }
+
+    });
+
+    return deferred.promise;
 
 };
 
-module.exports = {
-	from:from,
-	to:to
+Cache.prototype.file = function(couchDbDoc){
+	var deferred = q.defer();
+
+    var file = this.request.app.get('cache dir') + '/' + this.getHash();
+
+    fs.exists(file, function (exists) {
+        if(true === exists){
+            deferred.resolve(couchDbDoc);
+        }
+        else{
+            deferred.reject();
+        }
+    });
+    return deferred.promise;
 };
+
+
+Cache.prototype.get = function(){
+
+	var deferred = q.defer();
+
+    // disadvantage of this "new" thing
+    var that = this;
+    this.getCouch()
+    .then(function(couchDbDoc){
+        return that.file(couchDbDoc);
+    })
+    .then(function(couchDbDoc){
+        deferred.resolve(couchDbDoc);
+    })
+    .fail(function (error) {
+        deferred.reject();
+    })
+
+    return deferred.promise;
+};
+
+Cache.prototype.set = function(){
+	var deferred = q.defer();
+    return deferred.promise;
+};
+
+module.exports = Cache;
