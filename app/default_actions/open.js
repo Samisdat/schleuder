@@ -5,9 +5,10 @@ var http = require('http');
 var url = require('url');
 var buffer = require('buffer');
 
-var lwip = require('lwip');
 var q = require('q');
 var fileType = require('file-type');
+var Canvas = require('canvas');
+var Image = Canvas.Image;
 
 
 var getRequestOptions = function(imageUrl){
@@ -27,18 +28,18 @@ var getRequestOptions = function(imageUrl){
 		options.port = 443;
 	}
 
-	options.hostname = urlParsed.hostname; 
-	options.path = urlParsed.path; 
+	options.hostname = urlParsed.hostname;
+	options.path = urlParsed.path;
 
 	return options;
 
 };
 
-var open = function(schleuderAction){
+var open = function(url){
 
-	var deferred = q.defer();	
+	var deferred = q.defer();
 
-	var options = getRequestOptions(schleuderAction.getImageUrl());
+	var options = getRequestOptions(url);
 
 	var req = http.request(options, function(res) {
 
@@ -53,20 +54,36 @@ var open = function(schleuderAction){
 		res.on('end', function() {
 
 			var imageBuffer = Buffer.concat(data);
-			
+
 			var type = fileType(imageBuffer);
-			schleuderAction.setMimeType(type.mime);
 
-			if(undefined === schleuderAction.getFormat()){
-				deferred.reject();
-			}
+            var image = new Image();
 
-			lwip.open(imageBuffer, schleuderAction.getFormat(), function(error, image){
-				schleuderAction.setOrginalImage(image);
-				deferred.resolve(schleuderAction);	
-			});
+            image.onerror = function() {
+                deferred.reject();
+            };
 
-		});
+            image.onload = function() {
+                var width = image.width;
+                var height = image.height;
+
+                var canvas = new Canvas(width, height);
+                var ctx = canvas.getContext('2d');
+
+                ctx.drawImage(image, 0, 0, width, height);
+
+                deferred.resolve({
+                    width:width,
+                    height:height,
+                    mime:type.mime,
+                    ctx:ctx
+                });
+
+            };
+
+            image.src = imageBuffer;
+
+        });
 	});
 
 	req.on('error', function(e) {
@@ -75,7 +92,7 @@ var open = function(schleuderAction){
 
 	req.end();
 
-	return deferred.promise;	
+	return deferred.promise;
 
 
 };
