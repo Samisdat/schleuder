@@ -2,8 +2,8 @@ var heatmap = function(colors){
 
     var rows = colors.length;
     var cols = colors[0].length;
-    var maxHeat = 0;
 
+    var maxHeat = 0;
 
     var getMaxHeat = function(){
         return maxHeat;
@@ -52,12 +52,16 @@ var heatmap = function(colors){
         var lastRow = rows - 1;
         var lastCol = cols - 1;
 
-        for (var x = 0; x < rows;  x += 1) {
+        for (var x = 0; x < cols;  x += 1) {
 
             colors[0][x].setHeat(
                 colors[1][x].getHeat()
             );
-            colors[lastRow][x].setHeat(colors[(lastRow -1)][x].getHeat())
+
+            colors[lastRow][x].setHeat(
+                colors[(lastRow -1)][x].getHeat()
+            );
+
         }
 
         for (var y = 0; y < rows;  y += 1) {
