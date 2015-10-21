@@ -9,12 +9,10 @@ var Matrix = function(colors) {
     this.width = colors[0].length;
     this.height = colors.length;
 
-
     this.matrix = colors;
 
     var heatMap = heatmap(colors)
     this.maxHeat = heatMap.getMaxHeat();
-
 
 };
 
@@ -42,7 +40,7 @@ Matrix.prototype.getColor = function(row, col){
  * Proxy Matrix Items method
  */
 Matrix.prototype.setColor = function(row, col, r, g, b, a){
-    this.matrix[row][col].setColor(r, g, b, a);
+    this.matrix[row][col].set(r, g, b, a);
 };
 
 /**
@@ -101,28 +99,12 @@ Matrix.prototype.generateSeams = function(){
             var right = (last < (this.getWidth() - 1)) ? this.getHeat(row, last + 1) : Number.MAX_VALUE;
 
             if(center <= left && center <= right){
-                if(center === left){
-                    //console.log(center, left)
-                    //console.log('center and left are tie');
-                }
-                if(center === right){
-                    //console.log(center, right)
-                    //console.log('center and right are tie');
-                }
-                //console.log('dir center');
                 seam.addRow(last, this.getHeat(row, last));
             }
             else if(left < center && left <= right){
-                if(left === right){
-                    //console.log(left, right)
-                    //console.log('right and left are tie');
-                }
-
-                //console.log('dir left');
                 seam.addRow( (last - 1), this.getHeat(row, (last - 1)));
             }
             else if(right < center && right < left){
-                //console.log('dir right');
                 seam.addRow( (last + 1), this.getHeat(row, (last + 1)));
             }
         }
@@ -138,17 +120,46 @@ Matrix.prototype.numberOfSeams = function(){
     return this.seams.length;
 };
 
-Matrix.prototype.getReduced = function(width){
+Matrix.prototype.flip = function(){
+
+    var rotate = function (a){
+      // transpose from http://www.codesuck.com/2012/02/transpose-javascript-array-in-one-line.html
+      a = Object.keys(a[0]).map(function (c) { return a.map(function (r) { return r[c]; }); });
+      // row reverse
+      for (i in a){
+        a[i] = a[i].reverse();
+      }
+      return a;
+    }
+
+    var flipped = rotate(this.matrix);
+
+
+    for(var row = 0, rows = this.getWidth(); row < rows; row +=1){
+
+        for(var col = 0, cols = this.getHeight(); col < cols; col +=1){
+            flipped[row][col].setHeat(undefined);
+            flipped[row][col].setHeat('');
+        }
+    }
+
+    return new Matrix(flipped, true);
+
+};
+
+
+
+Matrix.prototype.getReduceWidth = function(width){
 
     this.generateSeams();
 
-    var reduceBy = this.getWidth() - width;
+    var reduceByWidth = this.getWidth() - width;
 
-    if( reduceBy > this.seams.length){
-        reduceBy = this.seams.length;
+    if( reduceByWidth > this.seams.length){
+        reduceByWidth = this.seams.length;
     }
 
-    for(var i = 0; i < reduceBy; i += 1){
+    for(var i = 0; i < reduceByWidth; i += 1){
 
         for(var row = 0, rows = this.getHeight(); row < rows; row += 1){
 
@@ -175,12 +186,89 @@ Matrix.prototype.getReduced = function(width){
         }
     }
 
+    return new Matrix(seamLessColors);
 
 
-    var seamLessMatrix = new Matrix(seamLessColors);
+};
+
+Matrix.prototype.getSeams = function(){
+    return this.seams;
+};
+
+Matrix.prototype.getReduceHeight = function(height){
 
 
-    return seamLessMatrix;
+    var flipped = this.flip();
+
+    flipped.generateSeams();
+
+    var reduceByWidth = flipped.getWidth() - height;
+
+    var verticalSeams = flipped.getSeams();
+
+    if( reduceByWidth > verticalSeams.length){
+        reduceByWidth = verticalSeams.length;
+    }
+
+    for(var i = 0; i < reduceByWidth; i += 1){
+
+        for(var row = 0, rows = flipped.getHeight(); row < rows; row += 1){
+
+            var col = flipped.seams[i].getRow(row);
+            flipped.markAsDeleted(row, col);
+
+        }
+    }
+
+    var seamLessColors = [];
+
+    for(var row = 0, rows = flipped.getHeight(); row < rows; row +=1){
+
+        seamLessColors[row] = [];
+        var seamCol = 0;
+
+        for(var col = 0, cols = flipped.getWidth(); col < cols; col +=1){
+            if(true === flipped.isDeleted(row, col)){
+                continue;
+            }
+
+            seamLessColors[row][seamCol] = flipped.matrix[row][col];
+            seamCol += 1;
+        }
+    }
+
+    return new Matrix(seamLessColors).flip().flip().flip();
+
+}
+
+Matrix.prototype.getReduced = function(targetDimension){
+
+    if(undefined === targetDimension.width){
+        targetDimension.width = this.matrix.getWidth();
+    }
+
+    if(undefined === targetDimension.height){
+        targetDimension.height = this.matrix.getHeight();
+    }
+
+    if(targetDimension.width === this.getWidth() && targetDimension.height === this.getHeight()){
+        return this;
+    }
+
+    var seamLess;
+
+    if(targetDimension.width !== this.getWidth()){
+        seamLess = this.getReduceWidth(targetDimension.width);
+    }
+    else{
+        seamLess = this;
+    }
+
+    if(targetDimension.height !== this.getHeight()){
+        seamLess = seamLess.getReduceHeight(targetDimension.height);
+    }
+
+    return seamLess;
 };
 
 module.exports = Matrix;

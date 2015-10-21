@@ -24,7 +24,10 @@ img.onload = function(){
   ctx.drawImage(img, 0, 0, width, height);
 
   var liquidScaling = new LiquidScaling(ctx);
-  var heatMapCtx = liquidScaling.resize(250);
+  var heatMapCtx = liquidScaling.resize({
+      width:290,
+      height:150
+  });
 
   heatMapCtx.canvas.toBuffer(function(err, buf){
     fs.writeFile(__dirname + '/public/seamcarver/redo.jpg', buf, function(){
@@ -39,4 +42,5 @@ img.onload = function(){
 //img.src = __dirname + '/public/seamcarver/ballon.jpg';
 //img.src = __dirname + '/public/seamcarver/habor.jpg';
 //img.src = __dirname + '/public/seamcarver/65435387.jpg';
+//img.src = __dirname + '/public/seamcarver/dummy.jpg';
 img.src = __dirname + '/public/seamcarver/ballon.jpg';
