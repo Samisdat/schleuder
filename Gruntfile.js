@@ -4,14 +4,32 @@ module.exports = function(grunt) {
   "use strict";
 
   require('time-grunt')(grunt);
+
   require('load-grunt-config')(grunt, {
     jitGrunt:true
   });
 
+  return;
+  // Add the grunt-mocha-test tasks.
+  grunt.loadNpmTasks('grunt-mocha-test');
+
     grunt.initConfig({
+
+    mochaTest: {
+      test: {
+        options: {
+          reporter: 'spec',
+          captureFile: 'results.txt', // Optionally capture the reporter output to a file
+          quiet: false, // Optionally suppress output to standard out (defaults to false)
+          clearRequireCache: false // Optionally clear the require cache before running tests (defaults to false)
+        },
+        src: ['test/**/seam.js']
+      }
+    },
+
         mocha_istanbul: {
             coverage: {
-                src: 'test' // a folder works nicely
+                src: 'test/**/*.js' // a folder works nicely
             },
             coverageSpecial: {
                 src: ['testSpecial/*/*.js', 'testUnique/*/*.js'], // specifying file patterns works as well
@@ -58,5 +76,6 @@ module.exports = function(grunt) {
 
     grunt.registerTask('coveralls', ['mocha_istanbul:coveralls']);
     grunt.registerTask('coverage', ['mocha_istanbul:coverage']);
+    grunt.registerTask('mocha', 'mochaTest');
 
 };

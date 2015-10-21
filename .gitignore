@@ -5,3 +5,4 @@ public/css
 .DS_Store
 cache/*
 coverage
+public/seamcarver/
