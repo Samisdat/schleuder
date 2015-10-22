@@ -35,11 +35,11 @@ var getRequestOptions = function(imageUrl){
 
 };
 
-var open = function(url){
+var open = function(image){
 
 	var deferred = q.defer();
 
-	var options = getRequestOptions(url);
+	var options = getRequestOptions(image.getImageUrl());
 
 	var req = http.request(options, function(res) {
 
@@ -57,31 +57,34 @@ var open = function(url){
 
 			var type = fileType(imageBuffer);
 
-            var image = new Image();
+            var openImage = new Image();
 
-            image.onerror = function() {
+            openImage.onerror = function() {
                 deferred.reject();
             };
 
-            image.onload = function() {
-                var width = image.width;
-                var height = image.height;
+            openImage.onload = function() {
+                var width = openImage.width;
+                var height = openImage.height;
 
                 var canvas = new Canvas(width, height);
                 var ctx = canvas.getContext('2d');
 
-                ctx.drawImage(image, 0, 0, width, height);
+                ctx.drawImage(openImage, 0, 0, width, height);
 
-                deferred.resolve({
-                    width:width,
-                    height:height,
-                    mime:type.mime,
-                    ctx:ctx
-                });
+                image.setCtx(ctx);
+                image.setOrginalWidth(width);
+                image.setOrginalHeight(height);
+                image.setWidth(width);
+                image.setHeight(height);
+
+                image.setMimeType(type.mime);
+
+                deferred.resolve(image);
 
             };
 
-            image.src = imageBuffer;
+            openImage.src = imageBuffer;
 
         });
 	});

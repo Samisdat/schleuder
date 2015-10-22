@@ -1,11 +1,7 @@
-var fs = require('fs');
-
 var express = require('express');
 var router = express.Router();
 
 var couch = require('../app/couch.js');
-
-var open = require('../app/default_actions/open');
 
 var Dispatcher = require('../app/dispatcher');
 
@@ -14,9 +10,8 @@ var LiquidScaling = require('../app/liquid-scaling/index');
 var cacheDir = '/var/www/schleuder/cache/';
 
 var crypto = require('crypto');
-var fs = require('fs');
 
-router.get('/local-image', function(req, res, next) {
+router.get('/local-image.jpg', function(req, res, next) {
 
   var filename = '/var/www/schleuder/raw-images/ballon-medium.jpg';
 
@@ -50,13 +45,23 @@ router.get('^/:action//*//:image$', function(request, response, next){
     var hash = 'foo';
 
     var imageUrl = 'http://c2.staticflickr.com/6/5632/22152957371_ccd82d8593_c.jpg';
-    imageUrl = 'http://schleuder.dev.pertz.eu/local-image';
+    imageUrl = 'http://schleuder.dev.pertz.eu/local-image.jpg';
 
-    open(imageUrl).then(function(data){
+    if(undefined === request.params.action || undefined === request.params.image){
+        next();
+        return;
+    }
+
+    var dispatcher = new Dispatcher(request, response, next);
+    dispatcher.action();
+    return;
+    dispatcher.open(imageUrl).then(function(data){
 
       var liquidScaling = new LiquidScaling(data.ctx);
       var heatMapCtx = liquidScaling.resize({width:250,height:180});
       heatMapCtx.canvas.toBuffer(function(err, buf){
+
+        dispatcher.write(buf);
         fs.writeFile(cacheDir + hash, buf, function(){
             response.type(data.mime);
             response.sendFile(cacheDir + hash);
