@@ -11,6 +11,7 @@ var Cache = require('./default_actions/cache');
 
 var actionsModules = {};
 actionsModules.open = require('../app/default_actions/open');
+actionsModules.LiquidScaling = require('../app/liquid-scaling/index');
 
 var Dispatcher = function(request, response, next) {
 
@@ -95,13 +96,45 @@ Dispatcher.prototype.action = function(){
 
     var actions = this.getActionsQueue();
 
-    var image = new Image(this.getImageUrl(), this.getUrlParameters());
+    var image = new Image(this.response, this.getImageUrl(), this.getUrlParameters());
 
     var that = this;
 
     actionsModules.open(image).then(function(image){
-        console.log('actionImage' + image.getMimeType());
-    })
+        var deferred = q.defer();
+
+        var liquidScaling = new actionsModules.LiquidScaling(image.getCtx());
+
+        var params = image.getActionParams();
+
+        if(undefined === params.width){
+            params.width = image.getWidth();
+        }
+
+        if(undefined === params.width){
+            params.width = image.getHeight();
+        }
+
+        image.setWidth(params.width);
+        image.setHeight(params.height);
+
+        var resized = liquidScaling.resize(params);
+
+        image.setCtx(resized);
+
+        deferred.resolve(image);
+
+        return deferred.promise;
+
+    }).then(function(image){
+        return that.cache.set(image);
+    }).then(function(image){
+
+        image.getCtx().canvas.toBuffer(function(err, buf){
+            that.response.type(image.getMimeType());
+            that.response.send(buf);
+        });
+    });
 
 };
 

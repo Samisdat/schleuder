@@ -1,5 +1,7 @@
 
-var Image = function(imageUrl, actionParams){
+var Image = function(response, imageUrl, actionParams){
+
+    this.response = response;
 
     this.imageUrl = imageUrl;
 
@@ -23,6 +25,10 @@ Image.prototype.getImageUrl = function(){
 
 Image.prototype.getActionParams = function(){
     return this.actionParams;
+};
+
+Image.prototype.getResponse = function(){
+    return this.response;
 };
 
 Image.prototype.getCtx = function(){

@@ -1,8 +1,8 @@
 var q = require('q');
 
-var send = function(schleuderAction){
+var send = function(image){
 
-	var deferred = q.defer();	
+	var deferred = q.defer();
 
 	schleuderAction.getActualImage().toBuffer(schleuderAction.getFormat(), {quality:100}, function(err, buffer){
 
@@ -11,9 +11,9 @@ var send = function(schleuderAction){
 		);
 		schleuderAction.getResponse().send(buffer);
 
-	});   
+	});
 
-	return deferred.promise;	
+	return deferred.promise;
 
 };
 
