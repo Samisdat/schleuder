@@ -33,7 +33,6 @@ Cache.prototype.getCouch = function(){
 	var deferred = q.defer();
 
     var hash = this.getHash();
-
     var checkCache = couch.get('/schleuder/_design/image/_view/hash', {
         key: hash,
         include_docs: true
@@ -61,7 +60,7 @@ Cache.prototype.getCouch = function(){
 Cache.prototype.file = function(couchDbDoc){
 	var deferred = q.defer();
 
-    var file = this.request.app.get('cache dir') + '/' + this.getHash();
+    var file = this.getFileName();
 
     fs.exists(file, function (exists) {
         if(true === exists){
@@ -119,7 +118,6 @@ Cache.prototype.writeFile = function(image){
     var path = fileName.split('/');
     path = path.slice(0, (path.length - 1));
     path = path.join('/');
-    console.log(path);
 
     mkdirp(path, function (err) {
         if (err){
@@ -150,6 +148,7 @@ Cache.prototype.createCouch = function(image){
     	var deferred = q.defer();
 
     var couchDbDoc = {
+        type:'image',
         hash:this.getHash(),
         fileName:this.getFileName(),
         imageUrl: image.getImageUrl(),

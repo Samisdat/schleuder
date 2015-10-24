@@ -29,11 +29,10 @@ router.get('/*', function(request, response, next) {
 
     isCached.then(function(){
         var couchDbDoc = dispatcher.getCouchDbDoc();
-
-        var mimeType = couchDbDoc.mime;
+        var mimeType = couchDbDoc.mimeType;
 
         response.type(mimeType);
-        response.sendFile(request.app.get('cache dir') + '/' +  couchDbDoc.hash);
+        response.sendFile(couchDbDoc.fileName);
 
     });
 

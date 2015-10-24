@@ -74,6 +74,7 @@ Dispatcher.prototype.isCached = function(){
     });
 
     isCached.then(function(couchDbDoc){
+        console.log(couchDbDoc)
         that.couchDbDoc  = couchDbDoc;
         deferred.resolve();
     });
