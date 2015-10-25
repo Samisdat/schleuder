@@ -1,8 +1,6 @@
 var express = require('express');
 var router = express.Router();
 
-var Dispatcher = require('../app/dispatcher');
-
 router.get('/local-image.jpg', function(req, res, next) {
 
   var filename = '/var/www/schleuder/raw-images/ballon-medium.jpg';
@@ -11,25 +9,28 @@ router.get('/local-image.jpg', function(req, res, next) {
 
 });
 
-router.get('/*', function(request, response, next) {
-    var dispatcher = new Dispatcher(request, response, next);
-    var isCached = dispatcher.isCached();
+var Cache = require('../app/default_actions/cache');
+
+router.get('/*', function(request, response, next){
+
+    var cache = new Cache(request.originalUrl, request.app.get('cache dir'));
+
+    var isCached = cache.get();
 
     isCached.fail(function(){
         next();
     });
 
-    isCached.then(function(){
-        var couchDbDoc = dispatcher.getCouchDbDoc();
+    isCached.then(function(couchDbDoc){
         var mimeType = couchDbDoc.mimeType;
 
         response.type(mimeType);
         response.sendFile(couchDbDoc.fileName);
-
     });
 
-
 });
+
+var Dispatcher = require('../app/dispatcher');
 
 router.get('^/:action//*//:image$', function(request, response, next){
 
@@ -40,8 +41,15 @@ router.get('^/:action//*//:image$', function(request, response, next){
         return;
     }
 
-    var dispatcher = new Dispatcher(request, response, next);
-    dispatcher.action();
+    var dispatcher = new Dispatcher(request);
+
+    dispatcher.action().then(function(image){
+        image.getCtx().canvas.toBuffer(function(err, buf){
+            response.type(image.getMimeType());
+            response.send(buf);
+        });
+
+    });
 
 });
 

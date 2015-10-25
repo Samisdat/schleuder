@@ -8,8 +8,10 @@ var q = require('q');
 var couch = require('../couch.js');
 var mkdirp = require('mkdirp');
 
-var Cache = function(request){
-    this.request = request;
+var Cache = function(requestUrl, cacheDir){
+
+    this.requestUrl = requestUrl;
+    this.cacheDir = cacheDir;
 
     this.hash;
 
@@ -22,7 +24,7 @@ Cache.prototype.getHash = function(){
     }
 
     var md5sum = crypto.createHash('md5');
-    this.hash = crypto.createHash('md5').update(this.request.originalUrl).digest("hex");
+    this.hash = crypto.createHash('md5').update(this.requestUrl).digest("hex");
 
 	return this.hash;
 
@@ -106,7 +108,7 @@ Cache.prototype.getFileName = function(){
         }
     }
 
-    return this.request.app.get('cache dir') + '/' + fileName.join('');
+    return this.cacheDir + '/' + fileName.join('');
 };
 
 
@@ -149,7 +151,7 @@ Cache.prototype.createCouch = function(image){
 
     var couchDbDoc = {
         type:'image',
-        hash:this.getHash(),
+        //hash:this.getHash(),
         fileName:this.getFileName(),
         imageUrl: image.getImageUrl(),
         width:image.getWidth(),

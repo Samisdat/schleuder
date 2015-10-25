@@ -13,18 +13,16 @@ var actionsModules = {};
 actionsModules.open = require('../app/default_actions/open');
 actionsModules.LiquidScaling = require('../app/liquid-scaling/index');
 
-var Dispatcher = function(request, response, next) {
+var Dispatcher = function(request) {
 
     this.domain = 'http://schleuder.dev.pertz.eu';
 
     this.request = request;
-    this.response = response;
-    this.next = next;
 
     this.couchDbDoc;
 
     this.cacheDir = this.request.app.get('cache dir');
-    this.cache = new Cache(request);
+    this.cache = new Cache(request.originalUrl, this.cacheDir);
 
     this.actions = [];
 
@@ -61,43 +59,23 @@ Dispatcher.prototype.getUrlParameters = function(){
 
 };
 
-Dispatcher.prototype.isCached = function(){
-
-	var deferred = q.defer();
-
-    var isCached = this.cache.get();
-
-    var that = this;
-
-    isCached.fail(function(){
-        deferred.reject();
-    });
-
-    isCached.then(function(couchDbDoc){
-        console.log(couchDbDoc)
-        that.couchDbDoc  = couchDbDoc;
-        deferred.resolve();
-    });
-
-    return deferred.promise;
-
-};
-
 Dispatcher.prototype.getActionsQueue = function(){
     var pre = ['open']
 
     var action = this.request.params.action;
 
-    var post = ['writeToCache', 'send', 'log'];
+    var post = ['writeToCache', 'log', 'send'];
 
     return pre.concat(action).concat(post);
 };
 
 Dispatcher.prototype.action = function(){
 
+	var deferred = q.defer();
+
     var actions = this.getActionsQueue();
 
-    var image = new Image(this.response, this.getImageUrl(), this.getUrlParameters());
+    var image = new Image(this.getImageUrl(), this.getUrlParameters());
 
     var that = this;
 
@@ -130,12 +108,10 @@ Dispatcher.prototype.action = function(){
     }).then(function(image){
         return that.cache.set(image);
     }).then(function(image){
-
-        image.getCtx().canvas.toBuffer(function(err, buf){
-            that.response.type(image.getMimeType());
-            that.response.send(buf);
-        });
+        deferred.resolve(image);
     });
+
+    return deferred.promise;
 
 };
 
