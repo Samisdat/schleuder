@@ -4,14 +4,14 @@ var Seam = require('./seam');
 
 var Matrix = function(colors) {
 
-    this.seams;
+    this.seams = undefined;
 
     this.width = colors[0].length;
     this.height = colors.length;
 
     this.matrix = colors;
 
-    var heatMap = heatmap(colors)
+    var heatMap = heatmap(colors);
     this.maxHeat = heatMap.getMaxHeat();
 
 };
@@ -28,12 +28,15 @@ Matrix.prototype.getHeight = function(){
  * Proxy Matrix Items method
  */
 Matrix.prototype.getColor = function(row, col){
+    return this.matrix[row][col].get();
+    /*
     try{
         return this.matrix[row][col].get();
     }
     catch(e){
         console.log(row, col, this.getWidth(), this.getHeight())
     }
+    */
 };
 
 /**
@@ -126,11 +129,11 @@ Matrix.prototype.flip = function(){
       // transpose from http://www.codesuck.com/2012/02/transpose-javascript-array-in-one-line.html
       a = Object.keys(a[0]).map(function (c) { return a.map(function (r) { return r[c]; }); });
       // row reverse
-      for (i in a){
+      for (var i in a){
         a[i] = a[i].reverse();
       }
       return a;
-    }
+    };
 
     var flipped = rotate(this.matrix);
 
@@ -159,19 +162,22 @@ Matrix.prototype.getReduceWidth = function(width){
         reduceByWidth = this.seams.length;
     }
 
+    var row = 0;
+    var rows = this.getHeight();
+
     for(var i = 0; i < reduceByWidth; i += 1){
 
-        for(var row = 0, rows = this.getHeight(); row < rows; row += 1){
+        for(row = 0; row < rows; row += 1){
 
-            var col = this.seams[i].getRow(row);
-            this.markAsDeleted(row, col);
+            var deleteCol = this.seams[i].getRow(row);
+            this.markAsDeleted(row, deleteCol);
 
         }
     }
 
     var seamLessColors = [];
 
-    for(var row = 0, rows = this.getHeight(); row < rows; row +=1){
+    for(row = 0; row < rows; row +=1){
 
         seamLessColors[row] = [];
         var seamCol = 0;
@@ -210,19 +216,22 @@ Matrix.prototype.getReduceHeight = function(height){
         reduceByWidth = verticalSeams.length;
     }
 
+    var row = 0;
+    var rows = flipped.getHeight();
+
     for(var i = 0; i < reduceByWidth; i += 1){
 
-        for(var row = 0, rows = flipped.getHeight(); row < rows; row += 1){
+        for(row = 0; row < rows; row += 1){
 
-            var col = flipped.seams[i].getRow(row);
-            flipped.markAsDeleted(row, col);
+            var deleteCol = flipped.seams[i].getRow(row);
+            flipped.markAsDeleted(row, deleteCol);
 
         }
     }
 
     var seamLessColors = [];
 
-    for(var row = 0, rows = flipped.getHeight(); row < rows; row +=1){
+    for(row = 0; row < rows; row +=1){
 
         seamLessColors[row] = [];
         var seamCol = 0;
@@ -239,7 +248,7 @@ Matrix.prototype.getReduceHeight = function(height){
 
     return new Matrix(seamLessColors).flip().flip().flip();
 
-}
+};
 
 Matrix.prototype.getReduced = function(targetDimension){
 

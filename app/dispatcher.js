@@ -2,16 +2,18 @@ var fs = require('fs');
 
 var q = require('q');
 
-var couch = require('../app/couch');
+var couch = require('./utils/couch');
 
 
 var Image = require('../app/image');
 
-var Cache = require('./default_actions/cache');
+var Cache = require('./utils/cache');
+//var LiquidScaling = require('./liquid-scaling/index');
+
 
 var actionsModules = {};
-actionsModules.open = require('../app/default_actions/open');
-actionsModules.LiquidScaling = require('../app/liquid-scaling/index');
+actionsModules['open-remote'] = require('./actions/open-remote');
+actionsModules['liquid-scaling'] = require('./actions/liquid-scaling');
 
 var Dispatcher = function(request) {
 
@@ -19,7 +21,7 @@ var Dispatcher = function(request) {
 
     this.request = request;
 
-    this.couchDbDoc;
+    this.couchDbDoc = undefined;
 
     this.cacheDir = this.request.app.get('cache dir');
     this.cache = new Cache(request.originalUrl, this.cacheDir);
@@ -60,11 +62,11 @@ Dispatcher.prototype.getUrlParameters = function(){
 };
 
 Dispatcher.prototype.getActionsQueue = function(){
-    var pre = ['open']
+    var pre = ['open-remote'];
 
     var action = this.request.params.action;
 
-    var post = ['writeToCache', 'log', 'send'];
+    var post = [];
 
     return pre.concat(action).concat(post);
 };
@@ -79,33 +81,9 @@ Dispatcher.prototype.action = function(){
 
     var that = this;
 
-    actionsModules.open(image).then(function(image){
-        var deferred = q.defer();
-
-        var liquidScaling = new actionsModules.LiquidScaling(image.getCtx());
-
-        var params = image.getActionParams();
-
-        if(undefined === params.width){
-            params.width = image.getWidth();
-        }
-
-        if(undefined === params.width){
-            params.width = image.getHeight();
-        }
-
-        image.setWidth(params.width);
-        image.setHeight(params.height);
-
-        var resized = liquidScaling.resize(params);
-
-        image.setCtx(resized);
-
-        deferred.resolve(image);
-
-        return deferred.promise;
-
-    }).then(function(image){
+    actionsModules['open-remote'](image)
+    .then(actionsModules['liquid-scaling'])
+    .then(function(image){
         return that.cache.set(image);
     }).then(function(image){
         deferred.resolve(image);

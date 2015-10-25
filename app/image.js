@@ -1,21 +1,19 @@
 
-var Image = function(response, imageUrl, actionParams){
-
-    this.response = response;
+var Image = function(imageUrl, actionParams){
 
     this.imageUrl = imageUrl;
 
     this.actionParams = actionParams;
 
-	this.mimeType;
+	this.mimeType = undefined;
 
-	this.ctx;
+	this.ctx = undefined;
 
-	this.orginalWidth;
-	this.orginalHeight;
+	this.orginalWidth = undefined;
+	this.orginalHeight = undefined;
 
-	this.width;
-	this.height;
+	this.width = undefined;
+	this.height = undefined;
 
 };
 
@@ -25,10 +23,6 @@ Image.prototype.getImageUrl = function(){
 
 Image.prototype.getActionParams = function(){
     return this.actionParams;
-};
-
-Image.prototype.getResponse = function(){
-    return this.response;
 };
 
 Image.prototype.getCtx = function(){
@@ -86,107 +80,3 @@ Image.prototype.setMimeType = function(mimeType){
 };
 
 module.exports = Image;
-
-/*
-var schleuderAction = function(request, response, imageUrl, actionName, actionParams){
-
-
-
-	var getImageUrl = function(){
-		return imageUrl;
-	};
-	var getActionName = function(){
-		return actionName;
-	};
-	var getActionParams = function(){
-		return actionParams;
-	};
-
-	var getMimeType = function(){
-		return mimeType;
-	};
-	var setMimeType = function(_mimeType){
-		if(undefined === mimeType){
-			mimeType = _mimeType;
-		}
-	};
-	var getFormat = function(){
-		if(undefined === mimeType){
-			return undefined;
-		}
-		if('image/png' === mimeType){
-			return 'png';
-		}
-		else if('image/jpeg' === mimeType){
-			return 'jpg';
-		}
-	};
-	var getOrginalImage = function(){
-		return orginalImage;
-	};
-
-	var setOrginalImage = function(_lwipImage){
-		if(undefined === orginalImage){
-			orginalImage = _lwipImage;
-			actualImage = _lwipImage;
-		}
-	};
-	var getActualImage = function(){
-		return actualImage;
-	};
-	var setActualImage = function(_lwipImage){
-		actualImage = _lwipImage;
-	};
-	var getOrginalWidth = function(){
-		if(undefined === orginalImage){
-			return undefined;
-		}
-		return orginalImage.width();
-	};
-	var getOrginalHeight = function(){
-		if(undefined === orginalImage){
-			return undefined;
-		}
-		return orginalImage.height();
-	};
-	var getActualWidth = function(){
-		if(undefined === actualImage){
-			return undefined;
-		}
-		return actualImage.width();
-	};
-	var getActualHeight = function(){
-		if(undefined === actualImage){
-			return undefined;
-		}
-		return actualImage.height();
-
-	};
-	var getRatio = function(){
-		return getOrginalWidth() / getOrginalHeight() ;
-	};
-
-
-	return {
-		getRequest: getRequest,
-		getResponse: getResponse,
-		getImageUrl:getImageUrl,
-		getActionName: getActionName,
-		getActionParams: getActionParams,
-		getMimeType: getMimeType,
-		setMimeType: setMimeType,
-		getFormat: getFormat,
-		setOrginalImage: setOrginalImage,
-		getOrginalImage: getOrginalImage,
-		getActualImage: getActualImage,
-		setActualImage: setActualImage,
-		getOrginalWidth: getOrginalWidth,
-		getOrginalHeight: getOrginalHeight,
-		getActualWidth: getActualWidth,
-		getActualHeight: getActualHeight,
-		getRatio: getRatio
-	};
-};
-
-module.exports = schleuderAction;
-*/

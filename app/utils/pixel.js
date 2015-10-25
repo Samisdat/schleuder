@@ -7,7 +7,6 @@ var Pixel = function(x, y, r, g, b, a) {
 };
 
 Pixel.prototype.getX = function(){
-    console.log('getX')
     return this.position.getX();
 };
 

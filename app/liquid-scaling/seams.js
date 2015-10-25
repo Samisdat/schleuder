@@ -2,7 +2,7 @@ var Seams = function() {
 
     this.seams = [];
 
-    this.uniqueSeams;
+    this.uniqueSeams = undefined;
 };
 
 Seams.prototype.getLength = function(){

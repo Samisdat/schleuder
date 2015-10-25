@@ -2,7 +2,7 @@
 
     'use strict';
 
-    var couch_config = require('../config/couchdb.js');
+    var couch_config = require('../../config/couchdb.js');
 
     var Q = require('q');
 
@@ -77,7 +77,7 @@
 		};
 
         if(undefined !== couch_config.admin_user && undefined !== couch_config.admin_pass){
-            opt.auth = couch_config.admin_user +':'+ couch_config.admin_pass
+            opt.auth = couch_config.admin_user +':'+ couch_config.admin_pass;
         }
 
 		if(data !== false && (method === 'POST' || method === 'PUT')){

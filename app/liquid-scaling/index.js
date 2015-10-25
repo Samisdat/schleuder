@@ -1,7 +1,8 @@
 var lwip = require('lwip');
 var fs = require('fs');
 
-var Canvas = require('canvas')
+var Canvas = require('canvas');
+
 var Matrix = require('./matrix');
 var LiquidColor = require('./liquid-color');
 
@@ -9,7 +10,7 @@ var getColorsFromCanvasCtx = function(ctx){
 
     var imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height).data;
 
-    var colors = [];;
+    var colors = [];
 
     var getPixel = function(col, row){
         var base = (row * ctx.canvas.width + col) * 4;
@@ -20,7 +21,7 @@ var getColorsFromCanvasCtx = function(ctx){
             imageData[base + 2],
             imageData[base + 3]
         );
-    }
+    };
 
     for (var row = 0, rows = ctx.canvas.height; row < rows;  row += 1) {
 

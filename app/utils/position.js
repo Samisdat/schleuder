@@ -4,11 +4,11 @@ var Position = function(x, y) {
 };
 
 Position.prototype.getX = function(){
-    return this.x;  
+    return this.x;
 };
 
 Position.prototype.getY = function(){
-    return this.y  
+    return this.y;
 };
 
 module.exports = Position;

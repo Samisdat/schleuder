@@ -8,6 +8,7 @@ var jshint = {
 		strict:true,
 		browser: true,
 		jquery: true,
+		reporter: require('jshint-stylish')
 	},
     frontend:{
         src:[
@@ -36,6 +37,25 @@ var jshint = {
         src:[
             'app/**/*.js',
             'test/**/*.js'
+        ],
+		options: {
+			curly: true,
+			eqeqeq: true,
+			undef: true,
+			unused: true,
+			strict: false,
+			browser: false,
+			jquery: false,
+			globals: {
+			    "require": true,
+			    "module": true
+		  	}
+		}
+    },
+    app:{
+        src:[
+            'app/**/*.js',
+            //'test/**/*.js'
         ],
 		options: {
 			curly: true,

@@ -4,16 +4,16 @@ var crypto = require('crypto');
 var fs = require('fs');
 
 var q = require('q');
-
-var couch = require('../couch.js');
 var mkdirp = require('mkdirp');
+
+var couch = require('./couch.js');
 
 var Cache = function(requestUrl, cacheDir){
 
     this.requestUrl = requestUrl;
     this.cacheDir = cacheDir;
 
-    this.hash;
+    this.hash = undefined;
 
 };
 
@@ -91,7 +91,7 @@ Cache.prototype.get = function(){
     })
     .fail(function (error) {
         deferred.reject();
-    })
+    });
 
     return deferred.promise;
 };
@@ -123,18 +123,18 @@ Cache.prototype.writeFile = function(image){
 
     mkdirp(path, function (err) {
         if (err){
-             console.error(err);
+             deferred.reject(err);
         }
 
         image.getCtx().canvas.toBuffer(function(error, buffer){
             if(error){
-                console.log(error)
+                deferred.reject(error);
                 return;
             }
 
             fs.writeFile(fileName, buffer, function(error){
                 if(error){
-                    console.log(error)
+                    deferred.reject(error);
                     return;
                 }
                 deferred.resolve(image);
@@ -163,9 +163,8 @@ Cache.prototype.createCouch = function(image){
     couch.post('/schleuder', couchDbDoc).then(function(data){
         deferred.resolve(image);
     }).fail(function(data){
-        console.log(data)
+        deferred.reject();
     });
-
 
     	return deferred.promise;
 };

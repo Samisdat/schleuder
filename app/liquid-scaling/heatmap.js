@@ -43,7 +43,7 @@ var heatmap = function(colors){
 
         return (color.r + color.g + color.b);
 
-    }
+    };
 
     // the heatmap implenentation from https://github.com/axemclion/seamcarving generates ver high values for all four edges
     // for now: just replace all edge pixels with their neibours
@@ -83,8 +83,8 @@ var heatmap = function(colors){
 
         for (var y = 0; y < rows; y++) {
 
-            var xenergy = sumColorChanels(x - 1, y - 1) + 2 * sumColorChanels(x - 1, y) + sumColorChanels(x - 1, y + 1) - sumColorChanels(x + 1, y - 1) - 2 * sumColorChanels(x + 1, y) - sumColorChanels(x + 1, y + 1)
-            var yenergy = sumColorChanels(x - 1, y - 1) + 2 * sumColorChanels(x, y - 1) + sumColorChanels(x + 1, y - 1) - sumColorChanels(x - 1, y + 1) - 2 * sumColorChanels(x, y + 1) - sumColorChanels(x + 1, y + 1)
+            var xenergy = sumColorChanels(x - 1, y - 1) + 2 * sumColorChanels(x - 1, y) + sumColorChanels(x - 1, y + 1) - sumColorChanels(x + 1, y - 1) - 2 * sumColorChanels(x + 1, y) - sumColorChanels(x + 1, y + 1);
+            var yenergy = sumColorChanels(x - 1, y - 1) + 2 * sumColorChanels(x, y - 1) + sumColorChanels(x + 1, y - 1) - sumColorChanels(x - 1, y + 1) - 2 * sumColorChanels(x, y + 1) - sumColorChanels(x + 1, y + 1);
             colors[y][x].setHeat(Math.sqrt(xenergy * xenergy + yenergy * yenergy) );
         }
     }

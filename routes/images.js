@@ -9,9 +9,12 @@ router.get('/local-image.jpg', function(req, res, next) {
 
 });
 
-var Cache = require('../app/default_actions/cache');
+var Cache = require('../app/utils/cache');
 
 router.get('/*', function(request, response, next){
+
+    next();
+    return;
 
     var cache = new Cache(request.originalUrl, request.app.get('cache dir'));
 
