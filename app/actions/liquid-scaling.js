@@ -2,7 +2,7 @@
 
 var q = require('q');
 
-var LiquidScaling = require('../liquid-scaling/index');
+var LiquidScaling = require('liquid-scaling');
 
 
 var liquidScalingAction = function(image){

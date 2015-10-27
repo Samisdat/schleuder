@@ -38,6 +38,7 @@
     "q": "^1.4.1",
     "request": "^2.64.0",
     "serve-favicon": "~2.3.0"
+    "liquid-scaling": "~2.3.0"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
