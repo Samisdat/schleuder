@@ -13,6 +13,7 @@ var Cache = require('./utils/cache');
 
 var actionsModules = {};
 actionsModules['open-remote'] = require('./actions/open-remote');
+actionsModules['resize'] = require('./actions/resize');
 actionsModules['liquid-scaling'] = require('./actions/liquid-scaling');
 
 var Dispatcher = function(request) {
@@ -77,12 +78,14 @@ Dispatcher.prototype.action = function(){
 
     var actions = this.getActionsQueue();
 
+    console.log(actions);
+
     var image = new Image(this.getImageUrl(), this.getUrlParameters());
 
     var that = this;
 
     actionsModules['open-remote'](image)
-    .then(actionsModules['liquid-scaling'])
+    .then(actionsModules['resize'])
     .then(function(image){
         return that.cache.set(image);
     }).then(function(image){
