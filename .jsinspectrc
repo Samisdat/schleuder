@@ -1,7 +1,0 @@
-{
-  "threshold":     30,
-  "identifiers":   true,
-  "ignore":        "Test.js|Spec.js", // used as RegExp,
-  "reporter":      "json",
-  "suppress":      100
-}

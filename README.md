@@ -1,2 +1,0 @@
-# schleuder
-NodeJS image scaling
