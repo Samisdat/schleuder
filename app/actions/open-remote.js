@@ -2,6 +2,7 @@
 
 var fs = require('fs');
 var http = require('http');
+var https = require('https');
 var url = require('url');
 var buffer = require('buffer');
 
@@ -38,10 +39,22 @@ var getRequestOptions = function(imageUrl){
 var open = function(image){
 
 	var deferred = q.defer();
+    
+    var imageUrl = image.getImageUrl();
 
-	var options = getRequestOptions(image.getImageUrl());
+	var options = getRequestOptions(imageUrl);
+    
+    console.log('image.getImageUrl()', imageUrl);
+    
+    var request = http.request;
+      
+    if(0 === imageUrl.lastIndexOf('https://')){
+        request = https.request;
+    }
+    
+    console.log(request)
 
-	var req = http.request(options, function(res) {
+	var req = request(options, function(res) {
 
 		var data = [];
 
